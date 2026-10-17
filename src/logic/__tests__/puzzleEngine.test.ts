@@ -301,5 +301,55 @@ describe('Foldspace Spatial Folding Logic Engine', () => {
       expect(engine.getLevel().transforms.every(t => t.isTransformed)).toBe(true);
     });
   });
+
+  describe('Level 7: The Hypercube Void (4D Compound Transformations)', () => {
+    it('should solve Level 7 using 4 sequential orthogonal transforms across all 3 axes', () => {
+      const engine = new PuzzleEngine(6);
+      expect(engine.getLevelIndex()).toBe(6);
+      expect(engine.getLevel().name).toContain('THE HYPERCUBE VOID');
+      expect(engine.getLevel().transforms.length).toBe(4);
+
+      // Step to initial fold boundary
+      expect(engine.tryMove(1, 0).success).toBe(true); // (1, 0, 0)
+
+      // Transform 1: Inversion Hinge [Alpha] (Z axis)
+      expect(engine.executeTransform('t-l7-inversion').success).toBe(true);
+      engine.setState('IDLE');
+
+      // Cross inverted bridge to (2, 0, 0)
+      expect(engine.tryMove(1, 0).success).toBe(true); // (2, 0, 0)
+
+      // Transform 2: Prism Rotator [Beta] (Y axis chamber rotation)
+      expect(engine.executeTransform('t-l7-prism-rot').success).toBe(true);
+      engine.setState('IDLE');
+
+      // Cross rotated bridge to (3, 0, 0)
+      expect(engine.tryMove(1, 0).success).toBe(true); // (3, 0, 0)
+
+      // Transform 3: Quantum Stairway [Gamma] (Z axis elevation)
+      expect(engine.executeTransform('t-l7-staircase').success).toBe(true);
+      engine.setState('IDLE');
+
+      // Step up elevated staircase to (4, 1, 0)
+      expect(engine.tryMove(1, 0).success).toBe(true); // (4, 1, 0)
+      expect(engine.getPlayerPos().y).toBe(1);
+
+      // Transform 4: Zenith Bridge [Delta] (X axis fold)
+      expect(engine.executeTransform('t-l7-zenith-bridge').success).toBe(true);
+      engine.setState('IDLE');
+
+      // Step across zenith bridge to (4, 1, 1)
+      expect(engine.tryMove(0, 1).success).toBe(true); // (4, 1, 1)
+
+      // Step to destination platform at (5, 1, 1)
+      expect(engine.tryMove(1, 0).success).toBe(true); // (5, 1, 1)
+
+      // Step up to grand celestial monolith goal at (5, 2, 2)
+      const goalStep = engine.tryMove(0, 1);
+      expect(goalStep.success).toBe(true);
+      expect(goalStep.isGoal).toBe(true);
+      expect(engine.getState()).toBe('LEVEL_CLEAR');
+    });
+  });
 });
 

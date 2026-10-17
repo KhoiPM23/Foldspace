@@ -415,6 +415,115 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
         ]
       }
     ]
+  },
+
+  // LEVEL 7: THE HYPERCUBE VOID
+  {
+    id: 'level-7',
+    levelNumber: 7,
+    name: 'PUZZLE 07: THE HYPERCUBE VOID',
+    subtitle: 'Compound 4D space folding across all three spatial axes.',
+    description: 'The pinnacle spatial anomaly. Manipulate orthogonal hinges and a quantum prism rotator to traverse the abyssal void to the grand celestial monolith.',
+    spawn: { x: 0, y: 0, z: 0 },
+    goal: { x: 5, y: 2, z: 2 },
+    tiles: [
+      { id: 'l7-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
+      { id: 'l7-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
+
+      // Transform 1: Inversion Fold
+      { id: 'l7-h1', x: 1, y: 1, z: 0, type: 'WALL', transformId: 't-l7-inversion', color: '#f59e0b' },
+
+      // Central Quantum Core
+      { id: 'l7-q0', x: 2, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
+
+      // Transform 2: Prism Rotator
+      { id: 'l7-q1', x: 2, y: 0, z: 1, type: 'WALKABLE', transformId: 't-l7-prism-rot', color: '#a855f7' },
+
+      // Transform 3: Staircase Ramp
+      { id: 'l7-stair', x: 3, y: 0, z: 1, type: 'WALL', transformId: 't-l7-staircase', color: '#ec4899' },
+
+      // Transform 4: Zenith Bridge
+      { id: 'l7-zenith', x: 4, y: 2, z: 0, type: 'WALL', transformId: 't-l7-zenith-bridge', color: '#06b6d4' },
+
+      // Destination Sanctum
+      { id: 'l7-plat', x: 5, y: 1, z: 1, type: 'WALKABLE', color: '#38bdf8' },
+      { id: 'l7-goal', x: 5, y: 2, z: 2, type: 'GOAL', color: '#00ffaa' }
+    ],
+    transforms: [
+      {
+        id: 't-l7-inversion',
+        name: 'INVERSION HINGE [ALPHA]',
+        type: 'HINGE_FOLD',
+        pivot: { x: 1.5, y: 0.5, z: 0 },
+        axis: 'Z',
+        direction: 1,
+        isTransformed: false,
+        angle: 0,
+        targetAngle: 0,
+        tileMappings: [
+          {
+            tileId: 'l7-h1',
+            normal: { x: 1, y: 1, z: 0, type: 'WALL' },
+            transformed: { x: 2, y: 0, z: 0, type: 'WALKABLE' }
+          }
+        ]
+      },
+      {
+        id: 't-l7-prism-rot',
+        name: 'PRISM ROTATOR [BETA]',
+        type: 'CHAMBER_ROTATION',
+        pivot: { x: 2, y: 0, z: 0 },
+        axis: 'Y',
+        direction: 1,
+        isTransformed: false,
+        angle: 0,
+        targetAngle: 0,
+        tileMappings: [
+          {
+            tileId: 'l7-q1',
+            normal: { x: 2, y: 0, z: 1, type: 'WALKABLE' },
+            transformed: { x: 3, y: 0, z: 0, type: 'WALKABLE' }
+          }
+        ]
+      },
+      {
+        id: 't-l7-staircase',
+        name: 'QUANTUM STAIRWAY [GAMMA]',
+        type: 'HINGE_FOLD',
+        pivot: { x: 3.5, y: 0.5, z: 0 },
+        axis: 'Z',
+        direction: 1,
+        isTransformed: false,
+        angle: 0,
+        targetAngle: 0,
+        tileMappings: [
+          {
+            tileId: 'l7-stair',
+            normal: { x: 3, y: 0, z: 1, type: 'WALL' },
+            transformed: { x: 4, y: 1, z: 0, type: 'WALKABLE' }
+          }
+        ]
+      },
+      {
+        id: 't-l7-zenith-bridge',
+        name: 'ZENITH SPRAY [DELTA]',
+        type: 'HINGE_FOLD',
+        pivot: { x: 4, y: 1.5, z: 0.5 },
+        axis: 'X',
+        direction: 1,
+        isTransformed: false,
+        angle: 0,
+        targetAngle: 0,
+        tileMappings: [
+          {
+            tileId: 'l7-zenith',
+            normal: { x: 4, y: 2, z: 0, type: 'WALL' },
+            transformed: { x: 4, y: 1, z: 1, type: 'WALKABLE' }
+          }
+        ]
+      }
+    ]
   }
 ];
+
 
