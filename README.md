@@ -86,8 +86,9 @@ npm test
 # Build production bundle
 npm run build
 
-# Run local development server
+# Run local development server (Dedicated port 7002 — no port collision)
 npm run dev
+# Open http://localhost:7002
 ```
 
 ---
