@@ -1,5 +1,5 @@
-import { LEVELS } from './levels';
-import { HingeDefinition, LevelData, Position3D, PuzzleState } from './types';
+import { FOLDSPACE_LEVELS } from './levels';
+import { LevelData, Position3D, PuzzleState, SpatialTransform } from './types';
 
 export class PuzzleEngine {
   private currentLevelIndex = 0;
@@ -8,8 +8,8 @@ export class PuzzleEngine {
   private puzzleState: PuzzleState = 'IDLE';
 
   constructor(initialLevelIndex = 0) {
-    this.currentLevelIndex = initialLevelIndex;
-    this.currentLevel = JSON.parse(JSON.stringify(LEVELS[this.currentLevelIndex]));
+    this.currentLevelIndex = Math.max(0, Math.min(FOLDSPACE_LEVELS.length - 1, initialLevelIndex));
+    this.currentLevel = JSON.parse(JSON.stringify(FOLDSPACE_LEVELS[this.currentLevelIndex]));
     this.playerPos = { ...this.currentLevel.spawn };
   }
 
@@ -22,7 +22,7 @@ export class PuzzleEngine {
   }
 
   public getTotalLevels(): number {
-    return LEVELS.length;
+    return FOLDSPACE_LEVELS.length;
   }
 
   public getPlayerPos(): Readonly<Position3D> {
@@ -37,13 +37,18 @@ export class PuzzleEngine {
     this.puzzleState = s;
   }
 
+  public setPaused(paused: boolean): void {
+    if (paused && this.puzzleState !== 'TRANSFORMING' && this.puzzleState !== 'LEVEL_CLEAR') {
+      this.puzzleState = 'PAUSED';
+    } else if (!paused && this.puzzleState === 'PAUSED') {
+      this.puzzleState = 'IDLE';
+    }
+  }
+
   public canMoveTo(target: Position3D): boolean {
     if (this.puzzleState !== 'IDLE') return false;
-
-    // Check if tile exists at target position
     const tile = this.getTileAt(target.x, target.y, target.z);
     if (!tile) return false;
-
     return tile.type === 'WALKABLE' || tile.type === 'GOAL';
   }
 
@@ -54,20 +59,20 @@ export class PuzzleEngine {
 
     const target: Position3D = {
       x: this.playerPos.x + dx,
-      y: this.playerPos.y, // Primary plane movement
+      y: this.playerPos.y,
       z: this.playerPos.z + dz
     };
 
-    // Also check step-up or step-down tile at target x/z
+    // Check same elevation
     let validTile = this.getTileAt(target.x, target.y, target.z);
     if (!validTile || validTile.type === 'WALL' || validTile.type === 'VOID') {
-      // Check if there is an elevated tile (step up +1)
+      // Check step up (+1 y)
       const upTile = this.getTileAt(target.x, target.y + 1, target.z);
       if (upTile && (upTile.type === 'WALKABLE' || upTile.type === 'GOAL')) {
         target.y += 1;
         validTile = upTile;
       } else {
-        // Check if there is a lowered tile (step down -1)
+        // Check step down (-1 y)
         const downTile = this.getTileAt(target.x, target.y - 1, target.z);
         if (downTile && (downTile.type === 'WALKABLE' || downTile.type === 'GOAL')) {
           target.y -= 1;
@@ -88,68 +93,62 @@ export class PuzzleEngine {
     return { success: false, isGoal: false, targetPos: { ...this.playerPos } };
   }
 
-  public toggleHinge(hingeId?: string): { success: boolean; hinge: HingeDefinition | null } {
-    if (this.puzzleState !== 'IDLE') return { success: false, hinge: null };
+  public executeTransform(transformId?: string): { success: boolean; transform: SpatialTransform | null; reason?: string } {
+    if (this.puzzleState !== 'IDLE') {
+      return { success: false, transform: null, reason: 'System busy' };
+    }
 
-    const hinges = this.currentLevel.hinges;
-    if (hinges.length === 0) return { success: false, hinge: null };
+    const transforms = this.currentLevel.transforms;
+    if (transforms.length === 0) {
+      return { success: false, transform: null, reason: 'No transforms available' };
+    }
 
-    const hinge = hingeId ? hinges.find(h => h.id === hingeId) : hinges[0];
-    if (!hinge) return { success: false, hinge: null };
+    // Default to first transform or match by ID
+    const transform = transformId
+      ? transforms.find(t => t.id === transformId)
+      : transforms.find(t => !t.isTransformed) || transforms[0];
 
-    // Toggle folded state
-    hinge.folded = !hinge.folded;
-    hinge.targetAngle = hinge.folded ? Math.PI / 2 : 0;
-    this.puzzleState = 'TRANSFORMING';
+    if (!transform) {
+      return { success: false, transform: null, reason: 'Transform not found' };
+    }
 
-    // Apply topological updates to affected tiles
-    this.updateHingeTopology(hinge);
+    const nextState = !transform.isTransformed;
 
-    return { success: true, hinge };
-  }
+    // Check collision / player safety:
+    // If player is on an affected tile, calculate where they will land
+    let newPlayerPos: Position3D | null = null;
+    for (const mapping of transform.tileMappings) {
+      const fromPos = transform.isTransformed ? mapping.transformed : mapping.normal;
+      const toPos = transform.isTransformed ? mapping.normal : mapping.transformed;
 
-  private updateHingeTopology(hinge: HingeDefinition): void {
-    if (this.currentLevel.id === 'level-1' && hinge.id === 'hinge-1') {
-      const hb1 = this.currentLevel.tiles.find(t => t.id === 'hb-1');
-      const hb2 = this.currentLevel.tiles.find(t => t.id === 'hb-2');
-
-      if (hinge.folded) {
-        // Folds down into bridge: (2, 0, 0) and (3, 0, 0)
-        if (hb1) { hb1.x = 2; hb1.y = 0; hb1.z = 0; hb1.type = 'WALKABLE'; }
-        if (hb2) { hb2.x = 3; hb2.y = 0; hb2.z = 0; hb2.type = 'WALKABLE'; }
-      } else {
-        // Folds back up into vertical wall
-        if (hb1) { hb1.x = 1; hb1.y = 1; hb1.z = 0; hb1.type = 'WALL'; }
-        if (hb2) { hb2.x = 1; hb2.y = 2; hb2.z = 0; hb2.type = 'WALL'; }
-      }
-    } else if (this.currentLevel.id === 'level-2' && hinge.id === 'hinge-elevate') {
-      const h1 = this.currentLevel.tiles.find(t => t.id === 'l2-h1');
-      if (hinge.folded) {
-        // Bridges to terrace
-        if (h1) { h1.x = 2; h1.y = 0; h1.z = 2; h1.type = 'WALKABLE'; }
-      } else {
-        if (h1) { h1.x = 1; h1.y = 0; h1.z = 2; h1.type = 'WALL'; }
-      }
-    } else if (this.currentLevel.id === 'level-3') {
-      if (hinge.id === 'hinge-3a') {
-        const h1a = this.currentLevel.tiles.find(t => t.id === 'l3-h1a');
-        const h1b = this.currentLevel.tiles.find(t => t.id === 'l3-h1b');
-        if (hinge.folded) {
-          if (h1a) { h1a.x = 2; h1a.y = 0; h1a.z = 0; h1a.type = 'WALKABLE'; }
-          if (h1b) { h1b.x = 2; h1b.y = 0; h1b.z = 1; h1b.type = 'WALKABLE'; }
-        } else {
-          if (h1a) { h1a.x = 1; h1a.y = 1; h1a.z = 0; h1a.type = 'WALL'; }
-          if (h1b) { h1b.x = 1; h1b.y = 2; h1b.z = 0; h1b.type = 'WALL'; }
-        }
-      } else if (hinge.id === 'hinge-3b') {
-        const h2a = this.currentLevel.tiles.find(t => t.id === 'l3-h2a');
-        if (hinge.folded) {
-          if (h2a) { h2a.x = 3; h2a.y = 0; h2a.z = 2; h2a.type = 'WALKABLE'; }
-        } else {
-          if (h2a) { h2a.x = 2; h2a.y = 0; h2a.z = 2; h2a.type = 'WALL'; }
-        }
+      if (this.playerPos.x === fromPos.x && this.playerPos.y === fromPos.y && this.playerPos.z === fromPos.z) {
+        newPlayerPos = { x: toPos.x, y: toPos.y, z: toPos.z };
+        break;
       }
     }
+
+    // Apply the spatial transformation to all affected tiles
+    transform.isTransformed = nextState;
+    transform.targetAngle = nextState ? (Math.PI / 2) * transform.direction : 0;
+    this.puzzleState = 'TRANSFORMING';
+
+    for (const mapping of transform.tileMappings) {
+      const tile = this.currentLevel.tiles.find(t => t.id === mapping.tileId);
+      if (tile) {
+        const dest = nextState ? mapping.transformed : mapping.normal;
+        tile.x = dest.x;
+        tile.y = dest.y;
+        tile.z = dest.z;
+        tile.type = dest.type;
+      }
+    }
+
+    // Relocate player safely if they were riding the transformed surface
+    if (newPlayerPos) {
+      this.playerPos = { ...newPlayerPos };
+    }
+
+    return { success: true, transform };
   }
 
   public getTileAt(x: number, y: number, z: number) {
@@ -157,15 +156,15 @@ export class PuzzleEngine {
   }
 
   public loadLevel(idx: number): void {
-    if (idx < 0 || idx >= LEVELS.length) return;
+    if (idx < 0 || idx >= FOLDSPACE_LEVELS.length) return;
     this.currentLevelIndex = idx;
-    this.currentLevel = JSON.parse(JSON.stringify(LEVELS[this.currentLevelIndex]));
+    this.currentLevel = JSON.parse(JSON.stringify(FOLDSPACE_LEVELS[this.currentLevelIndex]));
     this.playerPos = { ...this.currentLevel.spawn };
     this.puzzleState = 'IDLE';
   }
 
   public nextLevel(): boolean {
-    if (this.currentLevelIndex < LEVELS.length - 1) {
+    if (this.currentLevelIndex < FOLDSPACE_LEVELS.length - 1) {
       this.loadLevel(this.currentLevelIndex + 1);
       return true;
     }

@@ -1,5 +1,6 @@
 class FoldAudio {
   private ctx: AudioContext | null = null;
+  private isMuted: boolean = false;
 
   private init(): AudioContext {
     if (!this.ctx) {
@@ -12,6 +13,15 @@ class FoldAudio {
     return this.ctx;
   }
 
+  public setMuted(muted: boolean): boolean {
+    this.isMuted = muted;
+    return this.isMuted;
+  }
+
+  public isAudioMuted(): boolean {
+    return this.isMuted;
+  }
+
   public ensureAudio(): void {
     try {
       this.init();
@@ -21,6 +31,7 @@ class FoldAudio {
   }
 
   public playStep(): void {
+    if (this.isMuted) return;
     try {
       const ctx = this.init();
       const osc = ctx.createOscillator();
@@ -43,6 +54,7 @@ class FoldAudio {
   }
 
   public playFold(): void {
+    if (this.isMuted) return;
     try {
       const ctx = this.init();
       const osc = ctx.createOscillator();
@@ -64,7 +76,31 @@ class FoldAudio {
     }
   }
 
+  public playChamberRotate(): void {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.init();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(220, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.3);
+
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch {
+      // Ignore
+    }
+  }
+
   public playBlocked(): void {
+    if (this.isMuted) return;
     try {
       const ctx = this.init();
       const osc = ctx.createOscillator();
