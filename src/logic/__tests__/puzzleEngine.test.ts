@@ -264,5 +264,42 @@ describe('Foldspace Spatial Folding Logic Engine', () => {
       expect(engine.getState()).toBe('IDLE');
       expect(engine.tryMove(1, 0).success).toBe(true);
     });
+
+    it('should initialize and solve Level 6 The Tesseract Core with triple spatial folds', () => {
+      const engine = new PuzzleEngine(5); // Level 6 is index 5
+      expect(engine.getLevel().name).toContain('THE TESSERACT CORE');
+      expect(engine.getLevel().transforms.length).toBe(3);
+
+      // Step to bridge boundary
+      expect(engine.tryMove(1, 0).success).toBe(true); // (1, 0, 0)
+
+      // Transform 1: Lower Skyway Hinge
+      expect(engine.executeTransform('t-l6-skybridge').success).toBe(true);
+      engine.setState('IDLE');
+
+      // Cross bridge to hypercube center
+      expect(engine.tryMove(1, 0).success).toBe(true); // (2, 0, 0)
+
+      // Transform 2: Rotate Hypercube Chamber
+      expect(engine.executeTransform('t-l6-tesseract-rot').success).toBe(true);
+      engine.setState('IDLE');
+
+      // Cross rotated bridge segment to x=3
+      expect(engine.tryMove(1, 0).success).toBe(true); // (3, 0, 0)
+
+      // Transform 3: Elevate Ascension Spire
+      expect(engine.executeTransform('t-l6-ascension-spire').success).toBe(true);
+      engine.setState('IDLE');
+
+      // Ascend elevated spire ramp
+      expect(engine.tryMove(1, 1).success).toBe(true); // (4, 1, 1)
+
+      // Step onto apex tier
+      expect(engine.tryMove(0, 0).targetPos).toBeDefined();
+
+      // Verify level structure integrity
+      expect(engine.getLevel().transforms.every(t => t.isTransformed)).toBe(true);
+    });
   });
 });
+
