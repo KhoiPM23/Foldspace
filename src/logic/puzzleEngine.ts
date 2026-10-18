@@ -1,11 +1,12 @@
-import { FOLDSPACE_LEVELS } from './levels';
-import { LevelData, Position3D, PuzzleState, SpatialTransform } from './types';
+import { ARCHITECT_GLYPHS, FOLDSPACE_LEVELS } from './levels';
+import { ArchitectGlyph, LevelData, Position3D, PuzzleState, SpatialTransform } from './types';
 
 export class PuzzleEngine {
   private currentLevelIndex = 0;
   private currentLevel: LevelData;
   private playerPos: Position3D;
   private puzzleState: PuzzleState = 'IDLE';
+  private unlockedGlyphs: Set<string> = new Set();
 
   constructor(initialLevelIndex = 0) {
     this.currentLevelIndex = Math.max(0, Math.min(FOLDSPACE_LEVELS.length - 1, initialLevelIndex));
@@ -52,9 +53,26 @@ export class PuzzleEngine {
     return tile.type === 'WALKABLE' || tile.type === 'GOAL';
   }
 
-  public tryMove(dx: number, dz: number): { success: boolean; isGoal: boolean; targetPos: Position3D } {
+  public getUnlockedGlyphs(): Set<string> {
+    return this.unlockedGlyphs;
+  }
+
+  public isGlyphUnlocked(glyphId: string): boolean {
+    return this.unlockedGlyphs.has(glyphId);
+  }
+
+  public getAllGlyphs(): ArchitectGlyph[] {
+    return ARCHITECT_GLYPHS;
+  }
+
+  public tryMove(dx: number, dz: number): {
+    success: boolean;
+    isGoal: boolean;
+    targetPos: Position3D;
+    newlyDiscoveredGlyph: ArchitectGlyph | null;
+  } {
     if (this.puzzleState !== 'IDLE') {
-      return { success: false, isGoal: false, targetPos: { ...this.playerPos } };
+      return { success: false, isGoal: false, targetPos: { ...this.playerPos }, newlyDiscoveredGlyph: null };
     }
 
     const target: Position3D = {
@@ -87,10 +105,21 @@ export class PuzzleEngine {
       if (isGoal) {
         this.puzzleState = 'LEVEL_CLEAR';
       }
-      return { success: true, isGoal, targetPos: { ...target } };
+
+      // Check if stepped onto Architect Monolith
+      let newlyDiscoveredGlyph: ArchitectGlyph | null = null;
+      const m = this.currentLevel.monolith;
+      if (m && m.tilePos.x === target.x && m.tilePos.y === target.y && m.tilePos.z === target.z) {
+        if (!this.unlockedGlyphs.has(m.id)) {
+          this.unlockedGlyphs.add(m.id);
+          newlyDiscoveredGlyph = m;
+        }
+      }
+
+      return { success: true, isGoal, targetPos: { ...target }, newlyDiscoveredGlyph };
     }
 
-    return { success: false, isGoal: false, targetPos: { ...this.playerPos } };
+    return { success: false, isGoal: false, targetPos: { ...this.playerPos }, newlyDiscoveredGlyph: null };
   }
 
   public executeTransform(transformId?: string): { success: boolean; transform: SpatialTransform | null; reason?: string } {

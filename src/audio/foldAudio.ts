@@ -147,6 +147,32 @@ class FoldAudio {
     }
   }
 
+  public playGlyphChime(): void {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.init();
+      const freqs = [528, 660, 880, 1320];
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const t = ctx.currentTime + idx * 0.06;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t);
+
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.85);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.85);
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
   private droneGain: GainNode | null = null;
   private droneOscs: OscillatorNode[] = [];
 

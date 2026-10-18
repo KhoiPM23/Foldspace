@@ -37,6 +37,18 @@ export interface GridTile {
   transformId?: string;
 }
 
+export interface ArchitectGlyph {
+  id: string;
+  levelNumber: number;
+  symbol: string;
+  title: string;
+  coordinates: string;
+  epoch: string;
+  inscription: string;
+  philosophicalNote: string;
+  tilePos: Position3D;
+}
+
 export interface LevelData {
   id: string;
   levelNumber: number;
@@ -47,6 +59,8 @@ export interface LevelData {
   goal: Position3D;
   tiles: GridTile[];
   transforms: SpatialTransform[];
+  monolith?: ArchitectGlyph;
 }
 
 export type PuzzleState = 'IDLE' | 'MOVING' | 'TRANSFORMING' | 'LEVEL_CLEAR' | 'PAUSED';
+

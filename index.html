@@ -266,9 +266,12 @@
     <header>
       <div style="display: flex; align-items: center; gap: 12px;">
         <span class="brand-title">FOLDSPACE</span>
-        <span id="levelBadge" class="level-badge">PUZZLE 1 / 5</span>
+        <span id="levelBadge" class="level-badge">PUZZLE 1 / 7</span>
       </div>
       <div class="header-actions">
+        <button id="btnCodex" class="btn" style="border-color: #ffd700; color: #ffd700;" title="The Architects' Codex [C]">
+          <span>📜 CODEX [C]</span>
+        </button>
         <button id="btnPause" class="btn">
           <span id="pauseLabel">PAUSE</span> <span class="key-badge">[P]</span>
         </button>
@@ -368,15 +371,61 @@
           </button>
         </div>
       </div>
+
+      <!-- Glyph Discovery Attunement Modal -->
+      <div id="modalGlyphDiscovery" class="modal-backdrop hidden">
+        <div class="modal-box" style="border-color: #00e5ff; max-width: 540px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.35);">
+          <div style="font-size: 11px; color: #00e5ff; letter-spacing: 2px; font-weight: 700;">ARCHITECTURAL MONOLITH ATTUNED</div>
+          <div id="glyphDiscoverySymbol" style="font-size: 42px; color: #00e5ff; margin: 6px 0; text-shadow: 0 0 16px rgba(0, 229, 255, 0.7);">⟡</div>
+          <div id="glyphDiscoveryTitle" class="modal-title" style="color: #ffffff; font-size: 18px; margin-bottom: 4px;">THEOREM I: CONTINUITY OF MANIFOLDS</div>
+          <div id="glyphDiscoveryMeta" style="font-family: 'Space Mono', monospace; font-size: 11px; color: #38bdf8; margin-bottom: 12px;">EPOCH: FIRST CONVERGENCE // COORD: (2, 0, 1)</div>
+          
+          <div style="background: rgba(0, 229, 255, 0.06); border: 1px solid rgba(0, 229, 255, 0.2); border-left: 3px solid #00e5ff; padding: 14px; border-radius: 6px; text-align: left; font-size: 13px; line-height: 1.6; color: #e2e8f0; margin-bottom: 14px;">
+            <p id="glyphDiscoveryInscription" style="font-style: italic; margin-bottom: 8px;">"Space is not a void to be traversed, but a parchment to be folded."</p>
+            <p id="glyphDiscoveryNote" style="font-size: 11px; color: #94a3b8; margin: 0;">— Commentary on topological curvature</p>
+          </div>
+
+          <button id="btnCloseGlyphDiscovery" class="btn" style="background: #00e5ff; color: #050811; font-weight: 700; align-self: center; padding: 10px 28px; font-size: 12px;">
+            ATTUNE THEOREM [SPACE / ESC]
+          </button>
+        </div>
+      </div>
+
+      <!-- Full Architects' Codex Modal -->
+      <div id="modalGlyphCodex" class="modal-backdrop hidden">
+        <div class="modal-box" style="border-color: #ffd700; max-width: 680px; width: 92%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 45px rgba(255, 215, 0, 0.25);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #283952; padding-bottom: 10px; margin-bottom: 12px;">
+            <div>
+              <div style="font-size: 10px; color: #ffd700; letter-spacing: 2px; font-weight: 700;">ARCHAEOLOGICAL ARCHIVE</div>
+              <div class="modal-title" style="color: #ffd700; font-size: 18px; margin: 0;">THE ARCHITECTS' CODEX</div>
+            </div>
+            <div id="codexProgressBadge" class="level-badge" style="background: rgba(255, 215, 0, 0.15); border-color: #ffd700; color: #ffd700;">
+              0 / 7 THEOREMS ATTUNED
+            </div>
+          </div>
+          
+          <div id="codexListContainer" style="overflow-y: auto; display: flex; flex-direction: column; gap: 10px; max-height: 52vh; padding-right: 6px; text-align: left;">
+            <!-- Injected via TypeScript -->
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; border-top: 1px solid #1e2b40; padding-top: 10px;">
+            <span style="font-size: 11px; color: #64748b; font-family: 'Space Mono', monospace;">Attune obelisks across 7 sanctuaries to decrypt full theorems.</span>
+            <button id="btnCloseCodex" class="btn" style="background: #ffd700; color: #050811; font-weight: 700; padding: 8px 20px;">
+              CLOSE [ESC / C]
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="controls-bar">
       <span>Move: <span class="key-badge">W</span><span class="key-badge">A</span><span class="key-badge">S</span><span class="key-badge">D</span> / Arrows</span>
       <span>Transform: <span class="key-badge">SPACE</span></span>
-      <span>Rotate Camera: <span class="key-badge">Q</span> / <span class="key-badge">E</span></span>
+      <span>Rotate: <span class="key-badge">Q</span> / <span class="key-badge">E</span></span>
+      <span>Codex: <span class="key-badge">C</span></span>
       <span>Reset: <span class="key-badge">R</span></span>
       <span>Pause: <span class="key-badge">P</span></span>
-      <span>Status: Spatially Consistent Deterministic Graph</span>
+      <span>Status: Non-Euclidean Metric Synchronized</span>
     </div>
   </div>
 

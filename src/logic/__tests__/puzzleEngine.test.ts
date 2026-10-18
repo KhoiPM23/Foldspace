@@ -351,5 +351,51 @@ describe('Foldspace Spatial Folding Logic Engine', () => {
       expect(engine.getState()).toBe('LEVEL_CLEAR');
     });
   });
+
+  describe('The Architects\' Codex & Monolith Discovery System', () => {
+    it('should expose 7 architect glyphs across all 7 sanctuary levels', () => {
+      const engine = new PuzzleEngine(0);
+      const allGlyphs = engine.getAllGlyphs();
+      expect(allGlyphs.length).toBe(7);
+      expect(allGlyphs[0].id).toBe('glyph-1');
+      expect(allGlyphs[6].id).toBe('glyph-7');
+      expect(allGlyphs[0].title).toContain('SUNDERED SPIRE');
+      expect(allGlyphs[6].title).toContain('HYPERCUBE VOID');
+    });
+
+    it('should start with 0 unlocked glyphs', () => {
+      const engine = new PuzzleEngine(0);
+      expect(engine.getUnlockedGlyphs().size).toBe(0);
+      expect(engine.isGlyphUnlocked('glyph-1')).toBe(false);
+    });
+
+    it('should discover and unlock glyph when player steps on monolith obelisk', () => {
+      // Level 3 has monolith at (3, 0, 2)
+      const engine = new PuzzleEngine(2);
+      expect(engine.getLevel().monolith?.id).toBe('glyph-3');
+
+      // Move: (0, 0, 2) -> (1, 0, 2) -> (2, 0, 2) -> (3, 0, 2)
+      expect(engine.tryMove(1, 0).success).toBe(true);
+      expect(engine.tryMove(1, 0).success).toBe(true);
+
+      // Rotate chamber so corridor is connected
+      engine.executeTransform('t-l3-rotator');
+      engine.setState('IDLE');
+
+      // Step onto monolith tile at (3, 0, 2)
+      const monolithStep = engine.tryMove(1, 0);
+      expect(monolithStep.success).toBe(true);
+      expect(monolithStep.newlyDiscoveredGlyph).not.toBeNull();
+      expect(monolithStep.newlyDiscoveredGlyph?.id).toBe('glyph-3');
+      expect(monolithStep.newlyDiscoveredGlyph?.symbol).toBe('⧖');
+      expect(engine.isGlyphUnlocked('glyph-3')).toBe(true);
+
+      // Stepping off and back on should NOT re-trigger newlyDiscoveredGlyph
+      expect(engine.tryMove(-1, 0).success).toBe(true); // step back to (2, 0, 2)
+      const returnStep = engine.tryMove(1, 0); // step back onto (3, 0, 2)
+      expect(returnStep.success).toBe(true);
+      expect(returnStep.newlyDiscoveredGlyph).toBeNull(); // Already unlocked
+    });
+  });
 });
 

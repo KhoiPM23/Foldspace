@@ -17,6 +17,11 @@ export class SceneView {
   private goalRing1: THREE.Mesh | null = null;
   private goalRing2: THREE.Mesh | null = null;
   private portalParticles: THREE.Points | null = null;
+  private architectMonolithGroup: THREE.Group | null = null;
+  private architectMonolithRuneCore: THREE.Mesh | null = null;
+  private architectBeam: THREE.Mesh | null = null;
+  private architectTopPrism: THREE.Mesh | null = null;
+  private architectBotPrism: THREE.Mesh | null = null;
 
   private targetPlayerPos = new THREE.Vector3();
   private cameraLookTarget = new THREE.Vector3(2, 0.5, 1);
@@ -289,6 +294,15 @@ export class SceneView {
       this.portalParticles = null;
     }
 
+    if (this.architectMonolithGroup) {
+      this.scene.remove(this.architectMonolithGroup);
+      this.architectMonolithGroup = null;
+      this.architectMonolithRuneCore = null;
+      this.architectBeam = null;
+      this.architectTopPrism = null;
+      this.architectBotPrism = null;
+    }
+
     const level = engine.getLevel();
     const boxGeo = new THREE.BoxGeometry(0.92, 0.4, 0.92);
 
@@ -407,6 +421,74 @@ export class SceneView {
 
     this.scene.add(this.goalGroup);
 
+    // 4. Architect Monolith (Non-Euclidean Runic Obelisk)
+    if (level.monolith) {
+      const isUnlocked = engine.isGlyphUnlocked(level.monolith.id);
+      this.architectMonolithGroup = new THREE.Group();
+      this.architectMonolithGroup.position.set(
+        level.monolith.tilePos.x,
+        level.monolith.tilePos.y + 0.65,
+        level.monolith.tilePos.z
+      );
+
+      // Sleek Obsidian Dual-Cone Obelisk
+      const obeliskGeo = new THREE.ConeGeometry(0.22, 0.75, 4);
+      const obeliskMat = new THREE.MeshStandardMaterial({
+        color: '#070b12',
+        roughness: 0.15,
+        metalness: 0.85,
+        emissive: isUnlocked ? '#ffd700' : '#00e5ff',
+        emissiveIntensity: isUnlocked ? 0.75 : 0.35
+      });
+
+      this.architectTopPrism = new THREE.Mesh(obeliskGeo, obeliskMat);
+      this.architectTopPrism.position.y = 0.2;
+      this.architectMonolithGroup.add(this.architectTopPrism);
+
+      this.architectBotPrism = new THREE.Mesh(obeliskGeo, obeliskMat);
+      this.architectBotPrism.rotation.x = Math.PI;
+      this.architectBotPrism.position.y = -0.2;
+      this.architectMonolithGroup.add(this.architectBotPrism);
+
+      // Floating Runic Core
+      const coreGeo = new THREE.DodecahedronGeometry(0.12, 0);
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: isUnlocked ? '#ffd700' : '#00e5ff',
+        roughness: 0.1,
+        metalness: 0.9,
+        emissive: isUnlocked ? '#ffd700' : '#00e5ff',
+        emissiveIntensity: isUnlocked ? 1.3 : 0.75
+      });
+      this.architectMonolithRuneCore = new THREE.Mesh(coreGeo, coreMat);
+      this.architectMonolithGroup.add(this.architectMonolithRuneCore);
+
+      // Orbiting Runic Glyphs Ring
+      const ringGeo = new THREE.TorusGeometry(0.35, 0.015, 8, 24);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: isUnlocked ? '#ffd700' : '#00e5ff',
+        transparent: true,
+        opacity: 0.6
+      });
+      const runeRing = new THREE.Mesh(ringGeo, ringMat);
+      runeRing.rotation.x = Math.PI / 3;
+      this.architectMonolithGroup.add(runeRing);
+
+      // Vertical Beacon Beam
+      const beamGeo = new THREE.CylinderGeometry(0.03, 0.14, 2.2, 12, 1, true);
+      const beamMat = new THREE.MeshBasicMaterial({
+        color: isUnlocked ? '#ffd700' : '#00e5ff',
+        transparent: true,
+        opacity: isUnlocked ? 0.45 : 0.12,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+      });
+      this.architectBeam = new THREE.Mesh(beamGeo, beamMat);
+      this.architectBeam.position.y = 1.1;
+      this.architectMonolithGroup.add(this.architectBeam);
+
+      this.scene.add(this.architectMonolithGroup);
+    }
+
     // Position player
     const p = engine.getPlayerPos();
     this.playerMesh.position.set(p.x, p.y, p.z);
@@ -520,7 +602,16 @@ export class SceneView {
       this.goalGroup.position.y += Math.sin(time * 0.004) * 0.002;
     }
 
-    // 4. Ghost Wireframe Pulse
+    // 4. Architect Monolith Gyro Animation
+    if (this.architectMonolithGroup) {
+      this.architectMonolithGroup.rotation.y += 0.015;
+      if (this.architectMonolithRuneCore) {
+        this.architectMonolithRuneCore.rotation.x += 0.025;
+        this.architectMonolithRuneCore.rotation.z += 0.018;
+      }
+    }
+
+    // 5. Ghost Wireframe Pulse
     const pulseOpacity = 0.25 + Math.sin(time * 0.005) * 0.16;
     for (const ghost of this.ghostMeshes) {
       (ghost.material as THREE.MeshBasicMaterial).opacity = pulseOpacity;
@@ -551,6 +642,31 @@ export class SceneView {
   public rotateRoomView(clockwise = true): void {
     const delta = (clockwise ? 1 : -1) * (Math.PI / 2);
     this.targetTheta += delta;
+  }
+
+  public updateMonolithUnlocked(isUnlocked: boolean): void {
+    const col = isUnlocked ? '#ffd700' : '#00e5ff';
+    if (this.architectTopPrism) {
+      const mat = this.architectTopPrism.material as THREE.MeshStandardMaterial;
+      mat.emissive.set(col);
+      mat.emissiveIntensity = isUnlocked ? 0.8 : 0.35;
+    }
+    if (this.architectBotPrism) {
+      const mat = this.architectBotPrism.material as THREE.MeshStandardMaterial;
+      mat.emissive.set(col);
+      mat.emissiveIntensity = isUnlocked ? 0.8 : 0.35;
+    }
+    if (this.architectMonolithRuneCore) {
+      const mat = this.architectMonolithRuneCore.material as THREE.MeshStandardMaterial;
+      mat.color.set(col);
+      mat.emissive.set(col);
+      mat.emissiveIntensity = isUnlocked ? 1.4 : 0.75;
+    }
+    if (this.architectBeam) {
+      const mat = this.architectBeam.material as THREE.MeshBasicMaterial;
+      mat.color.set(col);
+      mat.opacity = isUnlocked ? 0.45 : 0.12;
+    }
   }
 
   private onResize(): void {

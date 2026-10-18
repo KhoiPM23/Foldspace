@@ -1,4 +1,84 @@
-import { LevelData } from './types';
+import { ArchitectGlyph, LevelData } from './types';
+
+export const ARCHITECT_GLYPHS: ArchitectGlyph[] = [
+  {
+    id: 'glyph-1',
+    levelNumber: 1,
+    symbol: '⟐',
+    title: 'THE FIRST THEOREM // SUNDERED SPIRE',
+    coordinates: 'KEPLER-186F // 12.8°R-POLAR',
+    epoch: 'ERA OF CRUSHED HORIZONS — 4,210 B.C.E.',
+    inscription: 'A straight line is not the shortest distance between two stars. It is merely a flat sheet awaiting the hands of a Shaper.',
+    philosophicalNote: 'Before the Calabi-Yau collapse, our worlds drifted as isolated planar sheets across the abyss. We carved hinges from hyper-dense dark matter to draw distant horizons into immediate contact.',
+    tilePos: { x: 3, y: 0, z: 0 }
+  },
+  {
+    id: 'glyph-2',
+    levelNumber: 2,
+    symbol: '⟁',
+    title: 'THE SECOND THEOREM // ASCENDANT LOOM',
+    coordinates: 'CYGNUS RIFT // ALTAR OF VAPORS',
+    epoch: 'ERA OF RECONSTRUCTED GRAVITY — 3,890 B.C.E.',
+    inscription: 'Elevation is an illusion of mass. When the plane folds upward, the valley becomes the summit, and the fall becomes ascension.',
+    philosophicalNote: 'The terraced sanctuaries were built to harness anti-gravitational aquifers. By raising orthogonal staircases through empty vacuum, the Architects climbed into higher geometric orders without burning propellant.',
+    tilePos: { x: 2, y: 0, z: 0 }
+  },
+  {
+    id: 'glyph-3',
+    levelNumber: 3,
+    symbol: '⧖',
+    title: 'THE THIRD THEOREM // CHRONO-GYRE',
+    coordinates: 'SIRIUS BINARY CHASM // SECTOR 9',
+    epoch: 'ERA OF ROTATIONAL ENTROPY — 3,120 B.C.E.',
+    inscription: 'Turn the room ninety degrees upon its axis, and you do not simply alter your heading—you invert the flow of cosmic causality.',
+    philosophicalNote: 'When two star systems approached catastrophic collision, the Rotary Chambers were turned to divert radiant energy through orthogonal pocket dimensions. What appeared to be a dead-end stone wall became an interstellar gateway.',
+    tilePos: { x: 3, y: 0, z: 2 }
+  },
+  {
+    id: 'glyph-4',
+    levelNumber: 4,
+    symbol: '⯃',
+    title: 'THE FOURTH THEOREM // ORIGAMI GATEWAY',
+    coordinates: 'VEGA VOID // 0.04 AU APHELION',
+    epoch: 'ERA OF INTERLACED SEAMS — 2,750 B.C.E.',
+    inscription: 'Space is not continuous fabric; it possesses seams. Find the crease, apply harmonic tension, and the gateway will blossom like a lotus.',
+    philosophicalNote: 'Ancient cartographers charted the seam-lines of reality. Pilgrims who walked the folded bridge reported seeing their own reflections traversing past and future loops simultaneously.',
+    tilePos: { x: 3, y: 1, z: 1 }
+  },
+  {
+    id: 'glyph-5',
+    levelNumber: 5,
+    symbol: '✦',
+    title: 'THE FIFTH THEOREM // CELESTIAL SANCTUM',
+    coordinates: 'M87 JET TERMINUS // VOID CITADEL',
+    epoch: 'ERA OF SINGULAR REPOSE — 1,980 B.C.E.',
+    inscription: 'The celestial sanctuary requires dual devotion. Fold the wing, balance the terrace, and step onto the altar of light.',
+    philosophicalNote: 'This sanctuary stood watch over the galactic halo. To prevent uninitiated wanderers from triggering dimensional collapse, its entry sequence required simultaneous manipulation of perpendicular spatial planes.',
+    tilePos: { x: 2, y: 0, z: 0 }
+  },
+  {
+    id: 'glyph-6',
+    levelNumber: 6,
+    symbol: '⯎',
+    title: 'THE SIXTH THEOREM // TESSERACT CORE',
+    coordinates: 'INNER CALABI-YAU HORIZON // 6-AXIS',
+    epoch: 'ERA OF HIGHER TOPOLOGY — 1,140 B.C.E.',
+    inscription: 'The shadow of a hypercube is a prison of eight cubes. Walk inside the shadow to manipulate the fourth spatial coordinate.',
+    philosophicalNote: 'Here, the Architects abandoned three-dimensional existence altogether. The cube rolls upon an axis that human senses cannot perceive, connecting floor to ceiling without passing through the intermediate air.',
+    tilePos: { x: 4, y: 2, z: 1 }
+  },
+  {
+    id: 'glyph-7',
+    levelNumber: 7,
+    symbol: '♾',
+    title: 'THE SEVENTH THEOREM // THE HYPERCUBE VOID',
+    coordinates: 'OMEGA CONVERGENCE POINT // 0.0.0.0',
+    epoch: 'ERA OF THE FINAL WEAVE — 0 B.C.E.',
+    inscription: 'When all folds are aligned, the universe ceases to be divided. The seeker, the stone, and the star become a single continuous line.',
+    philosophicalNote: 'The final codex left by the departing Architects. Having mastered non-Euclidean folding, they folded their entire civilization into a micro-scale Calabi-Yau manifold, escaping the heat death of this cosmos.',
+    tilePos: { x: 5, y: 1, z: 1 }
+  }
+];
 
 export const FOLDSPACE_LEVELS: LevelData[] = [
   // LEVEL 1: THE FIRST FOLD
@@ -10,6 +90,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     description: 'A chasm divides the path. Press [SPACE] or Click FOLD to rotate the vertical wall 90° into a horizontal bridge.',
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 4, y: 0, z: 0 },
+    monolith: ARCHITECT_GLYPHS[0],
     tiles: [
       { id: 'l1-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l1-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -58,6 +139,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     description: 'Two separate hinges: lower the first drawbridge to cross the moat, then raise the terrace lift to ascend to the shrine.',
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 4, y: 1, z: 0 },
+    monolith: ARCHITECT_GLYPHS[1],
     tiles: [
       { id: 'l2-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l2-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -123,6 +205,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     description: 'The central room module can be rotated 90° around its vertical axis. Re-orient the corridor to connect disjoint doorways.',
     spawn: { x: 0, y: 0, z: 2 },
     goal: { x: 4, y: 0, z: 2 },
+    monolith: ARCHITECT_GLYPHS[2],
     tiles: [
       { id: 'l3-start', x: 0, y: 0, z: 2, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l3-entry', x: 1, y: 0, z: 2, type: 'WALKABLE', color: '#38bdf8' },
@@ -177,6 +260,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     description: 'Transform the space in concert: fold the drawbridge to cross the divide, then rotate the pavilion to align with the elevated terrace.',
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 3, y: 1, z: 2 },
+    monolith: ARCHITECT_GLYPHS[3],
     tiles: [
       { id: 'l4-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l4-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -246,6 +330,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     description: 'Three interconnected spatial mechanisms. Navigate the rotating gateway, lower the outer moat, and raise the ascension ramp.',
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 4, y: 2, z: 2 },
+    monolith: ARCHITECT_GLYPHS[4],
     tiles: [
       { id: 'l5-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l5-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -336,6 +421,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     description: 'Master the complete non-Euclidean folding nexus: fold the skyway bridge, pivot the hypercube chamber, and elevate the spire to reach the Tesseract Singularity.',
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 4, y: 2, z: 2 },
+    monolith: ARCHITECT_GLYPHS[5],
     tiles: [
       { id: 'l6-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l6-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -426,6 +512,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     description: 'The pinnacle spatial anomaly. Manipulate orthogonal hinges and a quantum prism rotator to traverse the abyssal void to the grand celestial monolith.',
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 5, y: 2, z: 2 },
+    monolith: ARCHITECT_GLYPHS[6],
     tiles: [
       { id: 'l7-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l7-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
