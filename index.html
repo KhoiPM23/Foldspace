@@ -272,6 +272,12 @@
         <button id="btnCodex" class="btn" style="border-color: #ffd700; color: #ffd700;" title="The Architects' Codex [C]">
           <span>📜 CODEX [C]</span>
         </button>
+        <button id="btnAtlas" class="btn" style="border-color: #38bdf8; color: #38bdf8;" title="Sanctuary Atlas & Records [S]">
+          <span>🏛️ ATLAS [S]</span>
+        </button>
+        <button id="btnSettings" class="btn" style="border-color: #94a3b8; color: #cbd5e1;" title="Cosmic Configuration & Controls [O]">
+          <span>⚙️ OPTIONS [O]</span>
+        </button>
         <button id="btnUndo" class="btn" title="Undo last spatial move [Z / U]">
           <span>↶ UNDO [Z]</span>
         </button>
@@ -282,7 +288,6 @@
         <button id="btnRotateRight" class="btn"><span>↻ VIEW [E]</span></button>
         <button id="btnReset" class="btn"><span>RESET [R]</span></button>
         <button id="btnMute" class="btn"><span id="muteLabel">SFX: ON</span> <span class="key-badge">[M]</span></button>
-        <button id="btnLevelsMenu" class="btn"><span>PUZZLES</span></button>
       </div>
     </header>
 
@@ -446,14 +451,116 @@
           </div>
         </div>
       </div>
+
+      <!-- Sanctuary Atlas Modal -->
+      <div id="modalSanctuaryAtlas" class="modal-backdrop hidden">
+        <div class="modal-box" style="border-color: #38bdf8; max-width: 720px; width: 94%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 45px rgba(56, 189, 248, 0.25);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e2b40; padding-bottom: 10px; margin-bottom: 12px;">
+            <div>
+              <div style="font-size: 10px; color: #38bdf8; letter-spacing: 2px; font-weight: 700;">TOPOLOGICAL EXPEDITION LOG</div>
+              <div class="modal-title" style="color: #38bdf8; font-size: 18px; margin: 0;">SANCTUARY ATLAS & ARCHIVES</div>
+            </div>
+            <div id="atlasProgressBadge" class="level-badge" style="background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; color: #38bdf8;">
+              0 / 21 STARS COLLECTED
+            </div>
+          </div>
+
+          <div id="atlasListContainer" style="overflow-y: auto; display: flex; flex-direction: column; gap: 8px; max-height: 52vh; padding-right: 6px; text-align: left;">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; border-top: 1px solid #1e2b40; padding-top: 10px;">
+            <span style="font-size: 11px; color: #64748b; font-family: 'Space Mono', monospace;">Select any unlocked sanctuary to jump directly into its folding geometry.</span>
+            <button id="btnCloseAtlas" class="btn" style="background: #38bdf8; color: #050811; font-weight: 700; padding: 8px 20px;">
+              CLOSE [ESC / S]
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sanctuary Options / Configuration Modal -->
+      <div id="modalSettings" class="modal-backdrop hidden">
+        <div class="modal-box" style="border-color: #94a3b8; max-width: 580px; width: 92%; max-height: 85vh; display: flex; flex-direction: column; overflow-y: auto; text-align: left; box-shadow: 0 0 40px rgba(148, 163, 184, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e2b40; padding-bottom: 10px; margin-bottom: 14px;">
+            <div>
+              <div style="font-size: 10px; color: #38bdf8; letter-spacing: 2px; font-weight: 700;">ENVIRONMENT & SIMULATION</div>
+              <div class="modal-title" style="color: #f1f5f9; font-size: 18px; margin: 0;">SYSTEM CONFIGURATION</div>
+            </div>
+            <span class="key-badge">v1.2.0 RELEASE</span>
+          </div>
+
+          <!-- Audio Controls -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-family: 'Space Mono', monospace; font-size: 11px; color: #38bdf8; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">AUDIO BALANCING</div>
+            <div style="display: flex; flex-direction: column; gap: 10px; background: rgba(13, 20, 34, 0.6); padding: 12px; border-radius: 6px; border: 1px solid #1e2b40;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                  <span>Master Volume:</span>
+                  <span id="sliderMasterVolVal" style="color: #00ffaa; font-family: 'Space Mono', monospace;">80%</span>
+                </div>
+                <input id="sliderMasterVol" type="range" min="0" max="100" value="80" style="width: 100%; cursor: pointer;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Camera & Controls -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-family: 'Space Mono', monospace; font-size: 11px; color: #38bdf8; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">CAMERA CONTROLS</div>
+            <div style="display: flex; flex-direction: column; gap: 10px; background: rgba(13, 20, 34, 0.6); padding: 12px; border-radius: 6px; border: 1px solid #1e2b40;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                  <span>Orbit Drag Sensitivity:</span>
+                  <span id="sliderSensitivityVal" style="color: #00ffaa; font-family: 'Space Mono', monospace;">1.0x</span>
+                </div>
+                <input id="sliderSensitivity" type="range" min="50" max="250" value="100" style="width: 100%; cursor: pointer;">
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding-top: 4px;">
+                <span>Invert Pitch (Vertical Drag):</span>
+                <input id="toggleInvertPitch" type="checkbox" style="cursor: pointer; transform: scale(1.2);">
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding-top: 4px;">
+                <span>Display Mode:</span>
+                <button id="btnToggleFullscreen" class="btn" style="padding: 4px 10px; font-size: 10px;">TOGGLE FULLSCREEN [F11]</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Keybindings Reference Table -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-family: 'Space Mono', monospace; font-size: 11px; color: #38bdf8; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">OPERATIVE KEYBINDINGS</div>
+            <div style="font-size: 11px; font-family: 'Space Mono', monospace; background: rgba(13, 20, 34, 0.6); border: 1px solid #1e2b40; border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <div><span class="key-badge">W A S D</span> Walk Coordinates</div>
+              <div><span class="key-badge">SPACE</span> Transform Geometry</div>
+              <div><span class="key-badge">1 2 3 4</span> Specific Folding Axes</div>
+              <div><span class="key-badge">Z / U</span> Undo Spatial Step</div>
+              <div><span class="key-badge">Q / E</span> Snap Rotate View 90°</div>
+              <div><span class="key-badge">DRAG</span> Free Orbit Camera</div>
+              <div><span class="key-badge">SCROLL</span> Zoom In / Out</div>
+              <div><span class="key-badge">C</span> The Architects' Codex</div>
+              <div><span class="key-badge">S</span> Sanctuary Atlas</div>
+              <div><span class="key-badge">O</span> Options & Controls</div>
+              <div><span class="key-badge">R</span> Reset Current Chamber</div>
+              <div><span class="key-badge">P</span> Pause / Freeze State</div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; border-top: 1px solid #1e2b40; padding-top: 12px;">
+            <button id="btnCloseSettings" class="btn" style="background: #38bdf8; color: #050811; font-weight: 700; padding: 8px 24px;">
+              APPLY & RETURN [ESC / O]
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="controls-bar">
-      <span>Move: <span class="key-badge">W</span><span class="key-badge">A</span><span class="key-badge">S</span><span class="key-badge">D</span> / Arrows</span>
+      <span>Move: <span class="key-badge">W</span><span class="key-badge">A</span><span class="key-badge">S</span><span class="key-badge">D</span></span>
       <span>Transform: <span class="key-badge">SPACE</span></span>
       <span>Undo: <span class="key-badge">Z</span></span>
       <span>Rotate: <span class="key-badge">Q</span> / <span class="key-badge">E</span></span>
       <span>Codex: <span class="key-badge">C</span></span>
+      <span>Atlas: <span class="key-badge">S</span></span>
+      <span>Options: <span class="key-badge">O</span></span>
       <span>Reset: <span class="key-badge">R</span></span>
       <span>Pause: <span class="key-badge">P</span></span>
       <span>Status: Non-Euclidean Metric Synchronized</span>

@@ -1,11 +1,16 @@
 class FoldAudio {
   private ctx: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
   private isMuted: boolean = false;
+  private masterVolume: number = 0.8;
 
   private init(): AudioContext {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.ctx = new AudioCtx();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.masterVolume, this.ctx.currentTime);
+      this.masterGain.connect(this.ctx.destination);
     }
     if (this.ctx.state === 'suspended') {
       this.ctx.resume();
@@ -13,8 +18,27 @@ class FoldAudio {
     return this.ctx;
   }
 
+  private getOutput(): AudioNode {
+    this.init();
+    return this.masterGain || this.ctx!.destination;
+  }
+
+  public setMasterVolume(vol: number): void {
+    this.masterVolume = Math.max(0, Math.min(1, vol));
+    if (this.masterGain && this.ctx) {
+      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.masterVolume, this.ctx.currentTime);
+    }
+  }
+
+  public getMasterVolume(): number {
+    return this.masterVolume;
+  }
+
   public setMuted(muted: boolean): boolean {
     this.isMuted = muted;
+    if (this.masterGain && this.ctx) {
+      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.masterVolume, this.ctx.currentTime);
+    }
     return this.isMuted;
   }
 
@@ -45,7 +69,7 @@ class FoldAudio {
       gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.05);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(this.getOutput());
       osc.start();
       osc.stop(ctx.currentTime + 0.05);
     } catch {
@@ -68,7 +92,7 @@ class FoldAudio {
       gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.35);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(this.getOutput());
       osc.start();
       osc.stop(ctx.currentTime + 0.35);
     } catch {
@@ -91,7 +115,7 @@ class FoldAudio {
       gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.3);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(this.getOutput());
       osc.start();
       osc.stop(ctx.currentTime + 0.3);
     } catch {
@@ -114,7 +138,7 @@ class FoldAudio {
       gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.08);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(this.getOutput());
       osc.start();
       osc.stop(ctx.currentTime + 0.08);
     } catch {
@@ -138,7 +162,7 @@ class FoldAudio {
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(this.getOutput());
         osc.start(t);
         osc.stop(t + 0.4);
       });
@@ -164,7 +188,7 @@ class FoldAudio {
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.85);
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(this.getOutput());
         osc.start(t);
         osc.stop(t + 0.85);
       });
@@ -199,7 +223,7 @@ class FoldAudio {
       osc1.connect(filter);
       osc2.connect(filter);
       filter.connect(this.droneGain);
-      this.droneGain.connect(ctx.destination);
+      this.droneGain.connect(this.getOutput());
 
       osc1.start();
       osc2.start();

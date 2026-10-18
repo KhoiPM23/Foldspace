@@ -33,6 +33,8 @@ export class SceneView {
   private targetTheta = Math.PI / 4;
   private targetPhi = 0.85;
   private zoomD = 5.2;
+  private orbitSensitivity = 1.0;
+  private invertOrbitY = false;
 
   private isDragging = false;
   private prevPointerX = 0;
@@ -231,8 +233,9 @@ export class SceneView {
       this.prevPointerX = e.clientX;
       this.prevPointerY = e.clientY;
 
-      this.targetTheta -= dx * 0.007;
-      this.targetPhi = THREE.MathUtils.clamp(this.targetPhi + dy * 0.007, 0.25, 1.45);
+      this.targetTheta -= dx * 0.007 * this.orbitSensitivity;
+      const effectiveDy = (this.invertOrbitY ? -dy : dy) * 0.007 * this.orbitSensitivity;
+      this.targetPhi = THREE.MathUtils.clamp(this.targetPhi + effectiveDy, 0.25, 1.45);
     });
 
     const stopDrag = (e: PointerEvent) => {
@@ -667,6 +670,14 @@ export class SceneView {
       mat.color.set(col);
       mat.opacity = isUnlocked ? 0.45 : 0.12;
     }
+  }
+
+  public setOrbitSensitivity(sensitivity: number): void {
+    this.orbitSensitivity = Math.max(0.2, Math.min(3.0, sensitivity));
+  }
+
+  public setInvertOrbitY(invert: boolean): void {
+    this.invertOrbitY = invert;
   }
 
   private onResize(): void {

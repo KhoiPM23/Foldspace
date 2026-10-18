@@ -20,7 +20,22 @@ const btnRotateRight = document.getElementById('btnRotateRight') as HTMLButtonEl
 const btnReset = document.getElementById('btnReset') as HTMLButtonElement;
 const btnMute = document.getElementById('btnMute') as HTMLButtonElement;
 const muteLabel = document.getElementById('muteLabel') as HTMLElement;
-const btnLevelsMenu = document.getElementById('btnLevelsMenu') as HTMLButtonElement;
+
+const btnAtlas = document.getElementById('btnAtlas') as HTMLButtonElement;
+const modalSanctuaryAtlas = document.getElementById('modalSanctuaryAtlas') as HTMLElement;
+const btnCloseAtlas = document.getElementById('btnCloseAtlas') as HTMLButtonElement;
+const atlasProgressBadge = document.getElementById('atlasProgressBadge') as HTMLElement;
+const atlasListContainer = document.getElementById('atlasListContainer') as HTMLElement;
+
+const btnSettings = document.getElementById('btnSettings') as HTMLButtonElement;
+const modalSettings = document.getElementById('modalSettings') as HTMLElement;
+const btnCloseSettings = document.getElementById('btnCloseSettings') as HTMLButtonElement;
+const sliderMasterVol = document.getElementById('sliderMasterVol') as HTMLInputElement;
+const sliderMasterVolVal = document.getElementById('sliderMasterVolVal') as HTMLElement;
+const sliderSensitivity = document.getElementById('sliderSensitivity') as HTMLInputElement;
+const sliderSensitivityVal = document.getElementById('sliderSensitivityVal') as HTMLElement;
+const toggleInvertPitch = document.getElementById('toggleInvertPitch') as HTMLInputElement;
+const btnToggleFullscreen = document.getElementById('btnToggleFullscreen') as HTMLButtonElement;
 
 const btnCodex = document.getElementById('btnCodex') as HTMLButtonElement;
 const modalGlyphCodex = document.getElementById('modalGlyphCodex') as HTMLElement;
@@ -140,6 +155,7 @@ function handleMove(dx: number, dz: number): void {
       foldAudio.playLevelClear();
       const moves = engine.getMoveCount();
       const par = engine.getLevel().parMoves;
+      saveBestMoves(engine.getLevelIndex(), moves);
       winTitle.textContent = `${engine.getLevel().name} SOLVED`;
       winMoves.textContent = String(moves);
       winPar.textContent = String(par);
@@ -192,6 +208,30 @@ function handleExecuteTransform(transformId?: string): void {
   }
 }
 
+function getBestMoves(levelIdx: number): number | null {
+  try {
+    const raw = localStorage.getItem('foldspace_best_moves');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return typeof parsed[levelIdx] === 'number' ? parsed[levelIdx] : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveBestMoves(levelIdx: number, moves: number): void {
+  try {
+    const raw = localStorage.getItem('foldspace_best_moves');
+    const parsed = raw ? JSON.parse(raw) : {};
+    if (typeof parsed[levelIdx] !== 'number' || moves < parsed[levelIdx]) {
+      parsed[levelIdx] = moves;
+      localStorage.setItem('foldspace_best_moves', JSON.stringify(parsed));
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 function handleResetLevel(): void {
   engine.resetLevel();
   modalWin.classList.add('hidden');
@@ -199,6 +239,8 @@ function handleResetLevel(): void {
   modalPause.classList.add('hidden');
   modalGlyphDiscovery.classList.add('hidden');
   modalGlyphCodex.classList.add('hidden');
+  modalSanctuaryAtlas.classList.add('hidden');
+  modalSettings.classList.add('hidden');
   syncLevelUI();
 }
 
@@ -272,10 +314,123 @@ function renderCodexList(): void {
 function toggleCodexModal(): void {
   const isHidden = modalGlyphCodex.classList.contains('hidden');
   if (isHidden) {
+    modalSanctuaryAtlas.classList.add('hidden');
+    modalSettings.classList.add('hidden');
+    modalPause.classList.add('hidden');
+    modalTitle.classList.add('hidden');
     renderCodexList();
     modalGlyphCodex.classList.remove('hidden');
   } else {
     modalGlyphCodex.classList.add('hidden');
+    try { threeContainer.focus(); } catch {}
+  }
+}
+
+function renderAtlasList(): void {
+  const allLevels = engine.getAllLevels();
+  let totalStars = 0;
+  atlasListContainer.innerHTML = '';
+
+  allLevels.forEach((lvl, idx) => {
+    const best = getBestMoves(idx);
+    let starsStr = '☆☆☆';
+    let starsEarned = 0;
+    let badgeColor = '#64748b';
+
+    if (best !== null) {
+      if (best <= lvl.parMoves) {
+        starsStr = '★★★';
+        starsEarned = 3;
+        badgeColor = '#ffd700';
+      } else if (best <= lvl.parMoves + 2) {
+        starsStr = '★★☆';
+        starsEarned = 2;
+        badgeColor = '#00ffaa';
+      } else {
+        starsStr = '★☆☆';
+        starsEarned = 1;
+        badgeColor = '#38bdf8';
+      }
+    }
+    totalStars += starsEarned;
+
+    const isCurrent = idx === engine.getLevelIndex();
+    const allGlyphs = engine.getAllGlyphs();
+    const lvlGlyph = allGlyphs.find(g => g.levelNumber === idx + 1);
+    const glyphUnlocked = lvlGlyph ? engine.isGlyphUnlocked(lvlGlyph.id) : false;
+
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.justifyContent = 'space-between';
+    row.style.padding = '10px 14px';
+    row.style.borderRadius = '6px';
+    row.style.border = isCurrent ? '1px solid #38bdf8' : '1px solid #1e2b40';
+    row.style.background = isCurrent ? 'rgba(56, 189, 248, 0.1)' : 'rgba(11, 17, 28, 0.6)';
+
+    row.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-family: 'Space Mono', monospace; font-size: 16px; color: ${isCurrent ? '#38bdf8' : '#64748b'}; font-weight: 700;">#0${idx + 1}</span>
+        <div>
+          <div style="font-family: 'Space Mono', monospace; font-weight: 700; font-size: 12px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
+            <span>${lvl.name}</span>
+            ${glyphUnlocked ? '<span title="Architect Monolith Attuned" style="color: #ffd700; font-size: 11px;">[⟡ ATTUNED]</span>' : ''}
+          </div>
+          <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">${lvl.description}</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="text-align: right; font-family: 'Space Mono', monospace; font-size: 11px;">
+          <div style="color: ${badgeColor}; font-size: 14px; letter-spacing: 2px;">${starsStr}</div>
+          <div style="font-size: 10px; color: #64748b;">
+            BEST: <span style="color: #cbd5e1;">${best !== null ? `${best} m` : '—'}</span> / PAR: <span style="color: #00ffaa;">${lvl.parMoves} m</span>
+          </div>
+        </div>
+        <button class="btn btn-enter-sanctuary" data-idx="${idx}" style="font-size: 10px; padding: 6px 12px; ${isCurrent ? 'background: #38bdf8; color: #050811;' : ''}">
+          ${isCurrent ? 'CURRENT' : 'ENTER'}
+        </button>
+      </div>
+    `;
+
+    const enterBtn = row.querySelector('.btn-enter-sanctuary') as HTMLButtonElement;
+    enterBtn.addEventListener('click', () => {
+      engine.loadLevel(idx);
+      modalSanctuaryAtlas.classList.add('hidden');
+      syncLevelUI();
+      try { threeContainer.focus(); } catch {}
+    });
+
+    atlasListContainer.appendChild(row);
+  });
+
+  atlasProgressBadge.textContent = `${totalStars} / ${allLevels.length * 3} STARS COLLECTED`;
+}
+
+function toggleAtlasModal(): void {
+  const isHidden = modalSanctuaryAtlas.classList.contains('hidden');
+  if (isHidden) {
+    modalGlyphCodex.classList.add('hidden');
+    modalSettings.classList.add('hidden');
+    modalPause.classList.add('hidden');
+    modalTitle.classList.add('hidden');
+    renderAtlasList();
+    modalSanctuaryAtlas.classList.remove('hidden');
+  } else {
+    modalSanctuaryAtlas.classList.add('hidden');
+    try { threeContainer.focus(); } catch {}
+  }
+}
+
+function toggleSettingsModal(): void {
+  const isHidden = modalSettings.classList.contains('hidden');
+  if (isHidden) {
+    modalGlyphCodex.classList.add('hidden');
+    modalSanctuaryAtlas.classList.add('hidden');
+    modalPause.classList.add('hidden');
+    modalTitle.classList.add('hidden');
+    modalSettings.classList.remove('hidden');
+  } else {
+    modalSettings.classList.add('hidden');
     try { threeContainer.focus(); } catch {}
   }
 }
@@ -303,6 +458,30 @@ function toggleMute(): void {
   }
 }
 
+// Restore saved settings from localStorage
+try {
+  const savedVol = localStorage.getItem('foldspace_volume');
+  if (savedVol !== null) {
+    const v = parseInt(savedVol, 10);
+    sliderMasterVol.value = String(v);
+    sliderMasterVolVal.textContent = `${v}%`;
+    foldAudio.setMasterVolume(v / 100);
+  }
+  const savedSens = localStorage.getItem('foldspace_sensitivity');
+  if (savedSens !== null) {
+    const s = parseFloat(savedSens);
+    sliderSensitivity.value = String(Math.round(s * 100));
+    sliderSensitivityVal.textContent = `${s.toFixed(1)}x`;
+    sceneView.setOrbitSensitivity(s);
+  }
+  const savedInvert = localStorage.getItem('foldspace_invert_pitch');
+  if (savedInvert !== null) {
+    const inv = savedInvert === 'true';
+    toggleInvertPitch.checked = inv;
+    sceneView.setInvertOrbitY(inv);
+  }
+} catch {}
+
 // Initial Sync
 syncLevelUI();
 
@@ -314,8 +493,38 @@ btnStartGame.addEventListener('click', () => {
   try { threeContainer.focus(); } catch {}
 });
 
-btnLevelsMenu.addEventListener('click', () => {
-  modalTitle.classList.toggle('hidden');
+btnAtlas.addEventListener('click', toggleAtlasModal);
+btnCloseAtlas.addEventListener('click', toggleAtlasModal);
+
+btnSettings.addEventListener('click', toggleSettingsModal);
+btnCloseSettings.addEventListener('click', toggleSettingsModal);
+
+sliderMasterVol.addEventListener('input', () => {
+  const val = parseInt(sliderMasterVol.value, 10);
+  sliderMasterVolVal.textContent = `${val}%`;
+  foldAudio.setMasterVolume(val / 100);
+  try { localStorage.setItem('foldspace_volume', String(val)); } catch {}
+});
+
+sliderSensitivity.addEventListener('input', () => {
+  const val = parseInt(sliderSensitivity.value, 10);
+  const factor = val / 100;
+  sliderSensitivityVal.textContent = `${factor.toFixed(1)}x`;
+  sceneView.setOrbitSensitivity(factor);
+  try { localStorage.setItem('foldspace_sensitivity', String(factor)); } catch {}
+});
+
+toggleInvertPitch.addEventListener('change', () => {
+  sceneView.setInvertOrbitY(toggleInvertPitch.checked);
+  try { localStorage.setItem('foldspace_invert_pitch', toggleInvertPitch.checked ? 'true' : 'false'); } catch {}
+});
+
+btnToggleFullscreen.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
 });
 
 btnCodex.addEventListener('click', toggleCodexModal);
@@ -335,6 +544,8 @@ btnNextLevel.addEventListener('click', () => {
   modalWin.classList.add('hidden');
   modalGlyphDiscovery.classList.add('hidden');
   modalGlyphCodex.classList.add('hidden');
+  modalSanctuaryAtlas.classList.add('hidden');
+  modalSettings.classList.add('hidden');
   engine.nextLevel();
   syncLevelUI();
   try { threeContainer.focus(); } catch {}
@@ -344,6 +555,8 @@ btnReplayAll.addEventListener('click', () => {
   modalAllComplete.classList.add('hidden');
   modalGlyphDiscovery.classList.add('hidden');
   modalGlyphCodex.classList.add('hidden');
+  modalSanctuaryAtlas.classList.add('hidden');
+  modalSettings.classList.add('hidden');
   engine.loadLevel(0);
   syncLevelUI();
   try { threeContainer.focus(); } catch {}
@@ -359,6 +572,8 @@ document.querySelectorAll('.btn-level-item').forEach(el => {
     modalAllComplete.classList.add('hidden');
     modalGlyphDiscovery.classList.add('hidden');
     modalGlyphCodex.classList.add('hidden');
+    modalSanctuaryAtlas.classList.add('hidden');
+    modalSettings.classList.add('hidden');
     syncLevelUI();
     try { threeContainer.focus(); } catch {}
   });
@@ -377,6 +592,24 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
+  // If Settings modal is open, dismiss on Escape or O
+  if (!modalSettings.classList.contains('hidden')) {
+    if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') {
+      e.preventDefault();
+      toggleSettingsModal();
+      return;
+    }
+  }
+
+  // If Sanctuary Atlas modal is open, dismiss on Escape or S
+  if (!modalSanctuaryAtlas.classList.contains('hidden')) {
+    if (e.key === 'Escape' || e.key === 's' || e.key === 'S') {
+      e.preventDefault();
+      toggleAtlasModal();
+      return;
+    }
+  }
+
   // If Codex is open, dismiss on Escape or C
   if (!modalGlyphCodex.classList.contains('hidden')) {
     if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') {
@@ -390,6 +623,20 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'c' || e.key === 'C') {
     e.preventDefault();
     toggleCodexModal();
+    return;
+  }
+
+  // Toggle Atlas with S
+  if (e.key === 's' || e.key === 'S') {
+    e.preventDefault();
+    toggleAtlasModal();
+    return;
+  }
+
+  // Toggle Options with O
+  if (e.key === 'o' || e.key === 'O') {
+    e.preventDefault();
+    toggleSettingsModal();
     return;
   }
 
