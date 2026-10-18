@@ -48,6 +48,11 @@ function updateTransformButtons(): void {
     const statusText = tr.isTransformed ? 'REVERT' : actionType;
     btn.innerHTML = `<span>${tr.name}: ${statusText}</span> <span class="key-badge">[${idx + 1}${idx === 0 ? ' / SPACE' : ''}]</span>`;
 
+    btn.addEventListener('mouseenter', () => sceneView.highlightTransformTiles(tr.id));
+    btn.addEventListener('mouseleave', () => sceneView.highlightTransformTiles(null));
+    btn.addEventListener('focus', () => sceneView.highlightTransformTiles(tr.id));
+    btn.addEventListener('blur', () => sceneView.highlightTransformTiles(null));
+
     btn.addEventListener('click', () => {
       handleExecuteTransform(tr.id);
     });
@@ -86,11 +91,13 @@ function handleMove(dx: number, dz: number): void {
 
     if (result.isGoal) {
       foldAudio.playLevelClear();
-      if (engine.getLevelIndex() < engine.getTotalLevels() - 1) {
-        modalWin.classList.remove('hidden');
-      } else {
-        modalAllComplete.classList.remove('hidden');
-      }
+      sceneView.animatePortalArrival(() => {
+        if (engine.getLevelIndex() < engine.getTotalLevels() - 1) {
+          modalWin.classList.remove('hidden');
+        } else {
+          modalAllComplete.classList.remove('hidden');
+        }
+      });
     }
   } else {
     foldAudio.playBlocked();
@@ -142,6 +149,11 @@ function togglePause(): void {
 function toggleMute(): void {
   const muted = foldAudio.setMuted(!foldAudio.isAudioMuted());
   muteLabel.textContent = muted ? 'SFX: MUTED' : 'SFX: ON';
+  if (muted) {
+    foldAudio.stopCosmicDrone();
+  } else {
+    foldAudio.startCosmicDrone();
+  }
 }
 
 // Initial Sync
@@ -150,7 +162,9 @@ syncLevelUI();
 // Event Listeners
 btnStartGame.addEventListener('click', () => {
   foldAudio.ensureAudio();
+  foldAudio.startCosmicDrone();
   modalTitle.classList.add('hidden');
+  try { threeContainer.focus(); } catch {}
 });
 
 btnLevelsMenu.addEventListener('click', () => {
@@ -169,12 +183,14 @@ btnNextLevel.addEventListener('click', () => {
   modalWin.classList.add('hidden');
   engine.nextLevel();
   syncLevelUI();
+  try { threeContainer.focus(); } catch {}
 });
 
 btnReplayAll.addEventListener('click', () => {
   modalAllComplete.classList.add('hidden');
   engine.loadLevel(0);
   syncLevelUI();
+  try { threeContainer.focus(); } catch {}
 });
 
 // Level selector buttons
@@ -186,6 +202,7 @@ document.querySelectorAll('.btn-level-item').forEach(el => {
     modalWin.classList.add('hidden');
     modalAllComplete.classList.add('hidden');
     syncLevelUI();
+    try { threeContainer.focus(); } catch {}
   });
 });
 
@@ -235,8 +252,8 @@ window.addEventListener('keydown', (e) => {
     return;
   }
 
-  // 1, 2, 3 for numbered transforms
-  if (e.key === '1' || e.key === '2' || e.key === '3') {
+  // 1, 2, 3, 4 for numbered transforms (supporting compound Level 7 transforms)
+  if (e.key >= '1' && e.key <= '4') {
     const trIdx = parseInt(e.key, 10) - 1;
     const transforms = engine.getLevel().transforms;
     if (transforms[trIdx]) {

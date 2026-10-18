@@ -144,35 +144,62 @@ export class SceneView {
   private createPlayerModel(): THREE.Group {
     const group = new THREE.Group();
 
-    // Central core sphere
+    // 1. Ground projection shadow disc (visually anchors drone to floor)
+    const shadowGeo = new THREE.CircleGeometry(0.36, 24);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: '#001a24',
+      transparent: true,
+      opacity: 0.72,
+      depthWrite: false
+    });
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.02;
+    group.add(shadow);
+
+    // 2. Holographic downward vertical alignment beam
+    const beamGeo = new THREE.CylinderGeometry(0.04, 0.26, 0.42, 16, 1, true);
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: '#00e5ff',
+      transparent: true,
+      opacity: 0.22,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.position.y = 0.21;
+    group.add(beam);
+
+    // 3. Central core sphere
     const bodyGeo = new THREE.SphereGeometry(0.32, 24, 24);
     const bodyMat = new THREE.MeshStandardMaterial({
       color: '#00e5ff',
       roughness: 0.15,
       metalness: 0.6,
       emissive: '#005577',
-      emissiveIntensity: 0.3
+      emissiveIntensity: 0.35
     });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.castShadow = true;
     body.position.y = 0.45;
     group.add(body);
 
-    // Horizontal thruster halo ring
+    // 4. Horizontal thruster halo ring
     const ringGeo = new THREE.TorusGeometry(0.42, 0.04, 12, 32);
     const ringMat = new THREE.MeshStandardMaterial({
       color: '#38bdf8',
       roughness: 0.2,
       metalness: 0.8,
       emissive: '#38bdf8',
-      emissiveIntensity: 0.6
+      emissiveIntensity: 0.65
     });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = Math.PI / 2;
     ring.position.y = 0.45;
     group.add(ring);
 
-    // Visor eye
+    // 5. Visor eye
     const visorGeo = new THREE.BoxGeometry(0.24, 0.08, 0.14);
     const visorMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
     const visor = new THREE.Mesh(visorGeo, visorMat);
@@ -418,6 +445,47 @@ export class SceneView {
       }
     };
     requestAnimationFrame(animate);
+  }
+
+  public highlightTransformTiles(transformId: string | null): void {
+    const group = transformId ? this.transformGroups.get(transformId) : null;
+    this.tileMeshes.forEach((mesh) => {
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+      if (group && group.children.includes(mesh)) {
+        mat.emissive.set('#00ffaa');
+        mat.emissiveIntensity = 0.85;
+      } else {
+        mat.emissive.set('#1e1b4b');
+        mat.emissiveIntensity = 0.25;
+      }
+    });
+  }
+
+  public animatePortalArrival(onComplete: () => void): void {
+    const startTime = performance.now();
+    const duration = 500;
+    const startY = this.playerMesh.position.y;
+    const startScale = this.playerMesh.scale.x;
+
+    const warpAnim = (time: number) => {
+      const elapsed = time - startTime;
+      const t = Math.min(1.0, elapsed / duration);
+      const ease = t * t;
+
+      this.playerMesh.position.y = startY + ease * 0.8;
+      this.playerMesh.rotation.y += 0.25;
+      const currentScale = THREE.MathUtils.lerp(startScale, 0.15, ease);
+      this.playerMesh.scale.set(currentScale, currentScale, currentScale);
+
+      if (t < 1.0) {
+        requestAnimationFrame(warpAnim);
+      } else {
+        this.playerMesh.scale.set(1, 1, 1);
+        this.playerMesh.rotation.y = 0;
+        onComplete();
+      }
+    };
+    requestAnimationFrame(warpAnim);
   }
 
   public update(time: number): void {

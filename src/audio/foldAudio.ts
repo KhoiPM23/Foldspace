@@ -146,6 +146,56 @@ class FoldAudio {
       // Ignore
     }
   }
+
+  private droneGain: GainNode | null = null;
+  private droneOscs: OscillatorNode[] = [];
+
+  public startCosmicDrone(): void {
+    if (this.isMuted || this.droneGain) return;
+    try {
+      const ctx = this.init();
+      this.droneGain = ctx.createGain();
+      this.droneGain.gain.setValueAtTime(0.001, ctx.currentTime);
+      this.droneGain.gain.exponentialRampToValueAtTime(0.04, ctx.currentTime + 1.5);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(220, ctx.currentTime);
+
+      const osc1 = ctx.createOscillator();
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(65.4, ctx.currentTime); // C2
+
+      const osc2 = ctx.createOscillator();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(98.0, ctx.currentTime); // G2
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(this.droneGain);
+      this.droneGain.connect(ctx.destination);
+
+      osc1.start();
+      osc2.start();
+      this.droneOscs = [osc1, osc2];
+    } catch {
+      // Ignore
+    }
+  }
+
+  public stopCosmicDrone(): void {
+    if (!this.droneGain || !this.ctx) return;
+    try {
+      this.droneGain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+      setTimeout(() => {
+        this.droneOscs.forEach(o => { try { o.stop(); } catch {} });
+        this.droneOscs = [];
+        this.droneGain = null;
+      }, 400);
+    } catch {
+      this.droneGain = null;
+    }
+  }
 }
 
 export const foldAudio = new FoldAudio();
