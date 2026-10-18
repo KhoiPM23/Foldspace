@@ -397,5 +397,57 @@ describe('Foldspace Spatial Folding Logic Engine', () => {
       expect(returnStep.newlyDiscoveredGlyph).toBeNull(); // Already unlocked
     });
   });
+
+  describe('Undo System & Move Counter (Quality Pillars)', () => {
+    it('should track move count and allow undoing character movement', () => {
+      const engine = new PuzzleEngine(0);
+      expect(engine.getMoveCount()).toBe(0);
+      expect(engine.canUndo()).toBe(false);
+
+      // Move forward
+      expect(engine.tryMove(1, 0).success).toBe(true);
+      expect(engine.getPlayerPos().x).toBe(1);
+      expect(engine.getMoveCount()).toBe(1);
+      expect(engine.canUndo()).toBe(true);
+
+      // Undo move
+      const undoRes = engine.undo();
+      expect(undoRes.success).toBe(true);
+      expect(engine.getPlayerPos().x).toBe(0);
+      expect(engine.getMoveCount()).toBe(0);
+      expect(engine.canUndo()).toBe(false);
+    });
+
+    it('should undo spatial transformations cleanly', () => {
+      const engine = new PuzzleEngine(0);
+      // Move to (1, 0, 0)
+      engine.tryMove(1, 0);
+      expect(engine.getMoveCount()).toBe(1);
+
+      // Transform fold
+      engine.executeTransform();
+      engine.setState('IDLE');
+      expect(engine.getMoveCount()).toBe(2);
+      expect(engine.getLevel().transforms[0].isTransformed).toBe(true);
+      expect(engine.getTileAt(2, 0, 0)?.type).toBe('WALKABLE');
+
+      // Undo transform
+      expect(engine.undo().success).toBe(true);
+      expect(engine.getMoveCount()).toBe(1);
+      expect(engine.getLevel().transforms[0].isTransformed).toBe(false);
+      expect(engine.getTileAt(2, 0, 0)).toBeUndefined();
+    });
+
+    it('should define par moves for all 7 sanctuary levels', () => {
+      const engine = new PuzzleEngine(0);
+      const levels = engine.getAllLevels();
+      expect(levels.length).toBe(7);
+      for (const level of levels) {
+        expect(level.parMoves).toBeGreaterThan(0);
+      }
+      expect(levels[0].parMoves).toBe(3);
+      expect(levels[6].parMoves).toBe(12);
+    });
+  });
 });
 

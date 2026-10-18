@@ -60,6 +60,7 @@ export interface LevelData {
   tiles: GridTile[];
   transforms: SpatialTransform[];
   monolith?: ArchitectGlyph;
+  parMoves: number;
 }
 
 export type PuzzleState = 'IDLE' | 'MOVING' | 'TRANSFORMING' | 'LEVEL_CLEAR' | 'PAUSED';

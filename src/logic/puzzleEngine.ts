@@ -1,5 +1,12 @@
 import { ARCHITECT_GLYPHS, FOLDSPACE_LEVELS } from './levels';
-import { ArchitectGlyph, LevelData, Position3D, PuzzleState, SpatialTransform } from './types';
+import { ArchitectGlyph, GridTile, LevelData, Position3D, PuzzleState, SpatialTransform } from './types';
+
+export interface HistorySnapshot {
+  playerPos: Position3D;
+  tiles: GridTile[];
+  transforms: SpatialTransform[];
+  moveCount: number;
+}
 
 export class PuzzleEngine {
   private currentLevelIndex = 0;
@@ -7,6 +14,8 @@ export class PuzzleEngine {
   private playerPos: Position3D;
   private puzzleState: PuzzleState = 'IDLE';
   private unlockedGlyphs: Set<string> = new Set();
+  private moveCount = 0;
+  private history: HistorySnapshot[] = [];
 
   constructor(initialLevelIndex = 0) {
     this.currentLevelIndex = Math.max(0, Math.min(FOLDSPACE_LEVELS.length - 1, initialLevelIndex));
@@ -16,6 +25,10 @@ export class PuzzleEngine {
 
   public getLevel(): Readonly<LevelData> {
     return this.currentLevel;
+  }
+
+  public getAllLevels(): readonly LevelData[] {
+    return FOLDSPACE_LEVELS;
   }
 
   public getLevelIndex(): number {
@@ -100,6 +113,15 @@ export class PuzzleEngine {
     }
 
     if (validTile && (validTile.type === 'WALKABLE' || validTile.type === 'GOAL')) {
+      // Record undo snapshot
+      this.history.push({
+        playerPos: { ...this.playerPos },
+        tiles: JSON.parse(JSON.stringify(this.currentLevel.tiles)),
+        transforms: JSON.parse(JSON.stringify(this.currentLevel.transforms)),
+        moveCount: this.moveCount
+      });
+      this.moveCount++;
+
       this.playerPos = { ...target };
       const isGoal = validTile.type === 'GOAL';
       if (isGoal) {
@@ -156,6 +178,15 @@ export class PuzzleEngine {
       }
     }
 
+    // Record undo snapshot before transforming
+    this.history.push({
+      playerPos: { ...this.playerPos },
+      tiles: JSON.parse(JSON.stringify(this.currentLevel.tiles)),
+      transforms: JSON.parse(JSON.stringify(this.currentLevel.transforms)),
+      moveCount: this.moveCount
+    });
+    this.moveCount++;
+
     // Apply the spatial transformation to all affected tiles
     transform.isTransformed = nextState;
     transform.targetAngle = nextState ? (Math.PI / 2) * transform.direction : 0;
@@ -180,6 +211,33 @@ export class PuzzleEngine {
     return { success: true, transform };
   }
 
+  public getMoveCount(): number {
+    return this.moveCount;
+  }
+
+  public canUndo(): boolean {
+    return this.history.length > 0 && this.puzzleState === 'IDLE';
+  }
+
+  public undo(): { success: boolean; playerPos: Position3D } {
+    if (!this.canUndo()) {
+      return { success: false, playerPos: { ...this.playerPos } };
+    }
+
+    const snap = this.history.pop();
+    if (!snap) {
+      return { success: false, playerPos: { ...this.playerPos } };
+    }
+
+    this.playerPos = { ...snap.playerPos };
+    this.currentLevel.tiles = JSON.parse(JSON.stringify(snap.tiles));
+    this.currentLevel.transforms = JSON.parse(JSON.stringify(snap.transforms));
+    this.moveCount = snap.moveCount;
+    this.puzzleState = 'IDLE';
+
+    return { success: true, playerPos: { ...this.playerPos } };
+  }
+
   public getTileAt(x: number, y: number, z: number) {
     return this.currentLevel.tiles.find(t => t.x === x && t.y === y && t.z === z);
   }
@@ -189,6 +247,8 @@ export class PuzzleEngine {
     this.currentLevelIndex = idx;
     this.currentLevel = JSON.parse(JSON.stringify(FOLDSPACE_LEVELS[this.currentLevelIndex]));
     this.playerPos = { ...this.currentLevel.spawn };
+    this.moveCount = 0;
+    this.history = [];
     this.puzzleState = 'IDLE';
   }
 

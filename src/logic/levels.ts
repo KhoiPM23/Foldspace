@@ -91,6 +91,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 4, y: 0, z: 0 },
     monolith: ARCHITECT_GLYPHS[0],
+    parMoves: 3,
     tiles: [
       { id: 'l1-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l1-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -140,6 +141,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 4, y: 1, z: 0 },
     monolith: ARCHITECT_GLYPHS[1],
+    parMoves: 6,
     tiles: [
       { id: 'l2-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l2-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -206,6 +208,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     spawn: { x: 0, y: 0, z: 2 },
     goal: { x: 4, y: 0, z: 2 },
     monolith: ARCHITECT_GLYPHS[2],
+    parMoves: 4,
     tiles: [
       { id: 'l3-start', x: 0, y: 0, z: 2, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l3-entry', x: 1, y: 0, z: 2, type: 'WALKABLE', color: '#38bdf8' },
@@ -261,6 +264,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 3, y: 1, z: 2 },
     monolith: ARCHITECT_GLYPHS[3],
+    parMoves: 6,
     tiles: [
       { id: 'l4-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l4-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -331,6 +335,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 4, y: 2, z: 2 },
     monolith: ARCHITECT_GLYPHS[4],
+    parMoves: 8,
     tiles: [
       { id: 'l5-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l5-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -422,6 +427,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 4, y: 2, z: 2 },
     monolith: ARCHITECT_GLYPHS[5],
+    parMoves: 9,
     tiles: [
       { id: 'l6-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l6-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
@@ -513,6 +519,7 @@ export const FOLDSPACE_LEVELS: LevelData[] = [
     spawn: { x: 0, y: 0, z: 0 },
     goal: { x: 5, y: 2, z: 2 },
     monolith: ARCHITECT_GLYPHS[6],
+    parMoves: 12,
     tiles: [
       { id: 'l7-s0', x: 0, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },
       { id: 'l7-s1', x: 1, y: 0, z: 0, type: 'WALKABLE', color: '#38bdf8' },

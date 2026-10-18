@@ -36,6 +36,16 @@ const glyphDiscoveryMeta = document.getElementById('glyphDiscoveryMeta') as HTML
 const glyphDiscoveryInscription = document.getElementById('glyphDiscoveryInscription') as HTMLElement;
 const glyphDiscoveryNote = document.getElementById('glyphDiscoveryNote') as HTMLElement;
 
+const btnUndo = document.getElementById('btnUndo') as HTMLButtonElement;
+const curMoves = document.getElementById('curMoves') as HTMLElement;
+const parMoves = document.getElementById('parMoves') as HTMLElement;
+
+const winTitle = document.getElementById('winTitle') as HTMLElement;
+const winStars = document.getElementById('winStars') as HTMLElement;
+const winMoves = document.getElementById('winMoves') as HTMLElement;
+const winPar = document.getElementById('winPar') as HTMLElement;
+const winRatingText = document.getElementById('winRatingText') as HTMLElement;
+
 const modalTitle = document.getElementById('modalTitle') as HTMLElement;
 const btnStartGame = document.getElementById('btnStartGame') as HTMLButtonElement;
 const modalWin = document.getElementById('modalWin') as HTMLElement;
@@ -84,6 +94,10 @@ function syncLevelUI(): void {
   levelTitle.textContent = level.name;
   levelDesc.textContent = level.description;
 
+  curMoves.textContent = String(engine.getMoveCount());
+  parMoves.textContent = String(level.parMoves);
+  btnUndo.style.opacity = engine.canUndo() ? '1' : '0.5';
+
   // Highlight level selector items
   document.querySelectorAll('.btn-level-item').forEach(el => {
     const lvl = parseInt(el.getAttribute('data-level') || '0', 10);
@@ -98,11 +112,23 @@ function syncLevelUI(): void {
   sceneView.rebuildLevel(engine);
 }
 
+function handleUndo(): void {
+  const result = engine.undo();
+  if (result.success) {
+    foldAudio.playStep();
+    sceneView.rebuildLevel(engine);
+    sceneView.animatePlayerMove(result.playerPos);
+    updateTransformButtons();
+    syncLevelUI();
+  }
+}
+
 function handleMove(dx: number, dz: number): void {
   const result = engine.tryMove(dx, dz);
   if (result.success) {
     foldAudio.playStep();
     sceneView.animatePlayerMove(result.targetPos);
+    syncLevelUI();
 
     if (result.newlyDiscoveredGlyph) {
       foldAudio.playGlyphChime();
@@ -112,6 +138,25 @@ function handleMove(dx: number, dz: number): void {
 
     if (result.isGoal) {
       foldAudio.playLevelClear();
+      const moves = engine.getMoveCount();
+      const par = engine.getLevel().parMoves;
+      winTitle.textContent = `${engine.getLevel().name} SOLVED`;
+      winMoves.textContent = String(moves);
+      winPar.textContent = String(par);
+      if (moves <= par) {
+        winStars.textContent = '★★★';
+        winRatingText.textContent = 'PERFECT (MASTER)';
+        winRatingText.style.color = '#ffd700';
+      } else if (moves <= par + 2) {
+        winStars.textContent = '★★☆';
+        winRatingText.textContent = 'EXCELLENT';
+        winRatingText.style.color = '#00ffaa';
+      } else {
+        winStars.textContent = '★☆☆';
+        winRatingText.textContent = 'SOLVED';
+        winRatingText.style.color = '#38bdf8';
+      }
+
       sceneView.animatePortalArrival(() => {
         if (engine.getLevelIndex() < engine.getTotalLevels() - 1) {
           modalWin.classList.remove('hidden');
@@ -140,6 +185,7 @@ function handleExecuteTransform(transformId?: string): void {
       sceneView.animatePlayerMove(engine.getPlayerPos());
       sceneView.updateGhostPreviews(engine);
       updateTransformButtons();
+      syncLevelUI();
     });
   } else {
     foldAudio.playBlocked();
@@ -275,6 +321,7 @@ btnLevelsMenu.addEventListener('click', () => {
 btnCodex.addEventListener('click', toggleCodexModal);
 btnCloseCodex.addEventListener('click', toggleCodexModal);
 btnCloseGlyphDiscovery.addEventListener('click', hideGlyphModal);
+btnUndo.addEventListener('click', handleUndo);
 
 btnPause.addEventListener('click', togglePause);
 btnResumeGame.addEventListener('click', togglePause);
@@ -365,6 +412,18 @@ window.addEventListener('keydown', (e) => {
     return;
   }
 
+  // If Victory modal is open, advance on Space or Enter
+  if (!modalWin.classList.contains('hidden')) {
+    if (e.code === 'Space' || e.key === 'Enter') {
+      e.preventDefault();
+      modalWin.classList.add('hidden');
+      engine.nextLevel();
+      syncLevelUI();
+      try { threeContainer.focus(); } catch {}
+      return;
+    }
+  }
+
   // Camera rotations
   if (e.key === 'q' || e.key === 'Q') {
     sceneView.rotateRoomView(false);
@@ -372,6 +431,13 @@ window.addEventListener('keydown', (e) => {
   }
   if (e.key === 'e' || e.key === 'E') {
     sceneView.rotateRoomView(true);
+    return;
+  }
+
+  // Undo move or transform
+  if (e.key === 'z' || e.key === 'Z' || e.key === 'u' || e.key === 'U') {
+    e.preventDefault();
+    handleUndo();
     return;
   }
 
