@@ -63,10 +63,23 @@ const winRatingText = document.getElementById('winRatingText') as HTMLElement;
 
 const modalTitle = document.getElementById('modalTitle') as HTMLElement;
 const btnStartGame = document.getElementById('btnStartGame') as HTMLButtonElement;
+const btnMenuAtlas = document.getElementById('btnMenuAtlas') as HTMLButtonElement | null;
+const btnMenuCodex = document.getElementById('btnMenuCodex') as HTMLButtonElement | null;
+const btnMenuSettings = document.getElementById('btnMenuSettings') as HTMLButtonElement | null;
+
 const modalWin = document.getElementById('modalWin') as HTMLElement;
 const btnNextLevel = document.getElementById('btnNextLevel') as HTMLButtonElement;
+const btnWinRetry = document.getElementById('btnWinRetry') as HTMLButtonElement | null;
+const btnWinAtlas = document.getElementById('btnWinAtlas') as HTMLButtonElement | null;
+
 const modalAllComplete = document.getElementById('modalAllComplete') as HTMLElement;
 const btnReplayAll = document.getElementById('btnReplayAll') as HTMLButtonElement;
+const btnEpilogueCodex = document.getElementById('btnEpilogueCodex') as HTMLButtonElement | null;
+const btnEpilogueMenu = document.getElementById('btnEpilogueMenu') as HTMLButtonElement | null;
+
+const btnPauseRestart = document.getElementById('btnPauseRestart') as HTMLButtonElement | null;
+const btnPauseSettings = document.getElementById('btnPauseSettings') as HTMLButtonElement | null;
+const btnPauseToMenu = document.getElementById('btnPauseToMenu') as HTMLButtonElement | null;
 
 // Systems
 const engine = new PuzzleEngine(0);
@@ -177,6 +190,7 @@ function handleMove(dx: number, dz: number): void {
         if (engine.getLevelIndex() < engine.getTotalLevels() - 1) {
           modalWin.classList.remove('hidden');
         } else {
+          updateGrandCampaignModal();
           modalAllComplete.classList.remove('hidden');
         }
       });
@@ -184,6 +198,37 @@ function handleMove(dx: number, dz: number): void {
   } else {
     foldAudio.playBlocked();
   }
+}
+
+function updateGrandCampaignModal(): void {
+  const grandStats = document.getElementById('grandCampaignStats');
+  if (!grandStats) return;
+  const levels = engine.getAllLevels();
+  let totalStars = 0;
+  let totalMoves = 0;
+  let totalPar = 0;
+
+  levels.forEach((lvl, idx) => {
+    totalPar += lvl.parMoves;
+    const best = getBestMoves(idx);
+    if (best !== null) {
+      totalMoves += best;
+      if (best <= lvl.parMoves) totalStars += 3;
+      else if (best <= lvl.parMoves + 2) totalStars += 2;
+      else totalStars += 1;
+    }
+  });
+
+  let rank = 'DIMENSIONAL EXPLORER';
+  if (totalStars === 21) rank = 'PERFECT SPATIAL ARCHITECT';
+  else if (totalStars >= 18) rank = 'MASTER TOPOLOGIST';
+  else if (totalStars >= 14) rank = 'SENIOR CARTOGRAPHER';
+
+  grandStats.innerHTML = `
+    <span>TOTAL STARS: ${totalStars} / 21 ★</span>
+    <span>PAR METRIC: ${totalMoves} / ${totalPar} MOVES</span>
+    <span>RANK: ${rank}</span>
+  `;
 }
 
 function handleExecuteTransform(transformId?: string): void {
@@ -232,8 +277,8 @@ function saveBestMoves(levelIdx: number, moves: number): void {
   }
 }
 
-function handleResetLevel(): void {
-  engine.resetLevel();
+function closeAllModals(): void {
+  modalTitle.classList.add('hidden');
   modalWin.classList.add('hidden');
   modalAllComplete.classList.add('hidden');
   modalPause.classList.add('hidden');
@@ -241,6 +286,11 @@ function handleResetLevel(): void {
   modalGlyphCodex.classList.add('hidden');
   modalSanctuaryAtlas.classList.add('hidden');
   modalSettings.classList.add('hidden');
+}
+
+function handleResetLevel(): void {
+  engine.resetLevel();
+  closeAllModals();
   syncLevelUI();
 }
 
@@ -541,6 +591,7 @@ btnRotateRight.addEventListener('click', () => sceneView.rotateRoomView(true));
 btnReset.addEventListener('click', handleResetLevel);
 
 btnNextLevel.addEventListener('click', () => {
+  foldAudio.playUIClick();
   modalWin.classList.add('hidden');
   modalGlyphDiscovery.classList.add('hidden');
   modalGlyphCodex.classList.add('hidden');
@@ -551,7 +602,70 @@ btnNextLevel.addEventListener('click', () => {
   try { threeContainer.focus(); } catch {}
 });
 
+btnWinRetry?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  modalWin.classList.add('hidden');
+  handleResetLevel();
+});
+
+btnWinAtlas?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  modalWin.classList.add('hidden');
+  toggleAtlasModal();
+});
+
+btnPauseRestart?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  modalPause.classList.add('hidden');
+  engine.setPaused(false);
+  pauseLabel.textContent = 'PAUSE';
+  handleResetLevel();
+});
+
+btnPauseSettings?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  toggleSettingsModal();
+});
+
+btnPauseToMenu?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  modalPause.classList.add('hidden');
+  modalTitle.classList.remove('hidden');
+  engine.setPaused(true);
+  pauseLabel.textContent = 'PAUSE';
+});
+
+btnMenuAtlas?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  toggleAtlasModal();
+});
+
+btnMenuCodex?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  toggleCodexModal();
+});
+
+btnMenuSettings?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  toggleSettingsModal();
+});
+
+btnEpilogueCodex?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  modalAllComplete.classList.add('hidden');
+  toggleCodexModal();
+});
+
+btnEpilogueMenu?.addEventListener('click', () => {
+  foldAudio.playUIClick();
+  modalAllComplete.classList.add('hidden');
+  modalTitle.classList.remove('hidden');
+  engine.setPaused(true);
+  pauseLabel.textContent = 'PAUSE';
+});
+
 btnReplayAll.addEventListener('click', () => {
+  foldAudio.playUIClick();
   modalAllComplete.classList.add('hidden');
   modalGlyphDiscovery.classList.add('hidden');
   modalGlyphCodex.classList.add('hidden');
@@ -565,6 +679,7 @@ btnReplayAll.addEventListener('click', () => {
 // Level selector buttons
 document.querySelectorAll('.btn-level-item').forEach(el => {
   el.addEventListener('click', (e) => {
+    foldAudio.playUIClick();
     const lvl = parseInt((e.currentTarget as HTMLElement).getAttribute('data-level') || '0', 10);
     engine.loadLevel(lvl);
     modalTitle.classList.add('hidden');
@@ -647,8 +762,27 @@ window.addEventListener('keydown', (e) => {
     return;
   }
 
-  // If paused, ignore gameplay keys
+  // If paused, handle pause modal actions
   if (engine.getState() === 'PAUSED') {
+    if (e.key === 'r' || e.key === 'R') {
+      e.preventDefault();
+      modalPause.classList.add('hidden');
+      engine.setPaused(false);
+      pauseLabel.textContent = 'PAUSE';
+      handleResetLevel();
+      return;
+    }
+    if (e.key === 'o' || e.key === 'O') {
+      e.preventDefault();
+      toggleSettingsModal();
+      return;
+    }
+    if (e.key === 'm' || e.key === 'M') {
+      e.preventDefault();
+      closeAllModals();
+      modalTitle.classList.remove('hidden');
+      return;
+    }
     return;
   }
 

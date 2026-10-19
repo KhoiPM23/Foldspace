@@ -54,6 +54,24 @@ class FoldAudio {
     }
   }
 
+  public playUIClick(): void {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.init();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.035);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.035);
+      osc.connect(gain);
+      gain.connect(this.getOutput());
+      osc.start();
+      osc.stop(ctx.currentTime + 0.04);
+    } catch {}
+  }
+
   public playStep(): void {
     if (this.isMuted) return;
     try {

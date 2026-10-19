@@ -314,35 +314,50 @@
 
       <div id="threeContainer"></div>
 
-      <!-- Title / Start Screen Modal -->
+      <!-- Main Menu / Title Screen Modal -->
       <div id="modalTitle" class="modal-backdrop">
-        <div class="modal-box" style="border-color: #38bdf8;">
-          <div style="font-size: 11px; color: #38bdf8; letter-spacing: 2px; font-weight: 700;">SPATIAL TOPOLOGY LAB</div>
-          <div class="modal-title" style="color: #38bdf8;">FOLDSPACE</div>
-          <div class="modal-body" style="text-align: center;">
-            <p style="margin-bottom: 12px; font-size: 14px; color: #f1f5f9;">
-              Transform rooms and folding surfaces to reveal pathways through impossible spaces.
-            </p>
-            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; text-align: left; font-size: 12px; border-left: 3px solid #38bdf8; display: flex; flex-direction: column; gap: 4px;">
-              <div>• <strong>Hinge Fold:</strong> Rotates vertical panels 90° into traversable bridges.</div>
-              <div>• <strong>Chamber Roll:</strong> Rotates entire 90° room modules to connect perpendicular doors.</div>
-              <div>• <strong>Free Orbit Camera:</strong> Click and drag anywhere to inspect rooms from any angle! Scroll/pinch to zoom.</div>
-              <div>• <strong>Ghost Previews:</strong> Glowing amber wireframes display destination geometry!</div>
-            </div>
+        <div class="modal-box" style="border-color: #38bdf8; max-width: 620px; text-align: center; box-shadow: 0 0 60px rgba(56, 189, 248, 0.35); padding: 28px 24px;">
+          <div style="font-size: 11px; color: #38bdf8; letter-spacing: 3px; font-weight: 700; margin-bottom: 4px;">
+            EXPEDITION MATRIX // NON-EUCLIDEAN TOPOLOGY
+          </div>
+          <div class="modal-title" style="color: #ffffff; font-size: 34px; letter-spacing: 4px; margin: 4px 0 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);">
+            FOLDSPACE
+          </div>
+          <div style="font-size: 12px; color: #00ffaa; letter-spacing: 2px; font-weight: 700; margin-bottom: 16px;">
+            BEND REALITY. CONVERGE COORDINATES.
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
-            <button id="btnStartGame" class="btn" style="background: #38bdf8; color: #050811; font-weight: 700; padding: 10px 32px; font-size: 13px;">
-              ENTER SANCTUARY [PUZZLE 1]
+          <div style="background: rgba(13, 20, 34, 0.75); border: 1px solid #1e2b40; border-left: 3px solid #38bdf8; border-radius: 6px; padding: 12px 14px; text-align: left; font-size: 12px; line-height: 1.6; color: #cbd5e1; margin-bottom: 18px;">
+            The ancient Architects constructed 7 sacred sanctuaries bridging higher-dimensional space. Guide your quantum drone across unfolding tiles, align with sacred monolith obelisks, and harmonize the spatial manifold to reach the exit portal.
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 420px; margin: 0 auto;">
+            <button id="btnStartGame" class="btn" style="background: #38bdf8; color: #050811; font-weight: 700; padding: 12px 24px; font-size: 13px; justify-content: center; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);">
+              ENTER SANCTUARY 1 [PLAY]
             </button>
-            <div class="level-select-grid">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <button id="btnMenuAtlas" class="btn" style="justify-content: center; border-color: #38bdf8; color: #38bdf8;">
+                🏛️ ATLAS [S]
+              </button>
+              <button id="btnMenuCodex" class="btn" style="justify-content: center; border-color: #ffd700; color: #ffd700;">
+                📜 CODEX [C]
+              </button>
+            </div>
+            <button id="btnMenuSettings" class="btn" style="justify-content: center; border-color: #94a3b8; color: #cbd5e1;">
+              ⚙️ OPTIONS [O]
+            </button>
+
+            <div style="font-size: 10px; color: #64748b; font-family: 'Space Mono', monospace; margin-top: 8px;">
+              SELECT SANCTUARY CHAMBER:
+            </div>
+            <div class="level-select-grid" id="mainMenuLevelGrid">
               <button class="btn-level-item" data-level="0">1. First Fold</button>
               <button class="btn-level-item" data-level="1">2. Terraces</button>
-              <button class="btn-level-item" data-level="2">3. Rotary Junction</button>
-              <button class="btn-level-item" data-level="3">4. Origami Gateway</button>
-              <button class="btn-level-item" data-level="4">5. Celestial Sanctum</button>
-              <button class="btn-level-item" data-level="5">6. Tesseract Core</button>
-              <button class="btn-level-item" data-level="6">7. Hypercube Void</button>
+              <button class="btn-level-item" data-level="2">3. Rotary</button>
+              <button class="btn-level-item" data-level="3">4. Gateway</button>
+              <button class="btn-level-item" data-level="4">5. Sanctum</button>
+              <button class="btn-level-item" data-level="5">6. Tesseract</button>
+              <button class="btn-level-item" data-level="6">7. Hypercube</button>
             </div>
           </div>
         </div>
@@ -374,36 +389,76 @@
           <div class="modal-body" style="font-size: 12px; color: #94a3b8; margin-bottom: 14px;">
             You deciphered the spatial coordinates and bridged the dimensional rift.
           </div>
-          <button id="btnNextLevel" class="btn" style="background: #00ffaa; color: #060911; font-weight: 700; align-self: center; padding: 10px 28px; font-size: 12px;">
-            ADVANCE TO NEXT SANCTUARY [SPACE]
-          </button>
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+            <button id="btnNextLevel" class="btn" style="background: #00ffaa; color: #060911; font-weight: 700; justify-content: center; padding: 10px 24px; font-size: 12px;">
+              ADVANCE TO NEXT SANCTUARY [SPACE]
+            </button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <button id="btnWinRetry" class="btn" style="justify-content: center; border-color: #ffd700; color: #ffd700;">
+                RETRY FOR PAR [R]
+              </button>
+              <button id="btnWinAtlas" class="btn" style="justify-content: center; border-color: #38bdf8; color: #38bdf8;">
+                ATLAS [S]
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Grand Master Completion Modal -->
+      <!-- Grand Master Campaign Epilogue Modal -->
       <div id="modalAllComplete" class="modal-backdrop hidden">
-        <div class="modal-box" style="border-color: #ffd700;">
-          <div class="modal-title" style="color: #ffd700;">MASTER OF SPATIAL TOPOLOGY</div>
-          <div class="modal-body">
-            All 7 non-Euclidean spatial chambers have been solved! From fundamental hinge folds to compound 4D hypercube rotations across all three axes, your mastery of folding topology is absolute.
+        <div class="modal-box" style="border-color: #ffd700; max-width: 560px;">
+          <div style="font-size: 11px; color: #ffd700; letter-spacing: 2px; font-weight: 700;">EXPEDITION COMPLETED</div>
+          <div class="modal-title" style="color: #ffd700; font-size: 24px; margin: 4px 0 8px;">MASTER OF SPATIAL TOPOLOGY</div>
+          
+          <div style="background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; padding: 14px; margin-bottom: 14px; text-align: left; font-size: 12px; line-height: 1.6; color: #e2e8f0;">
+            <p style="margin-bottom: 8px;">
+              All 7 non-Euclidean spatial chambers have resonated into absolute topological harmony! The folding surfaces stabilize as the gateway to the 4th spatial dimension unfolds before your quantum drone.
+            </p>
+            <div id="grandCampaignStats" style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255, 215, 0, 0.3); padding-top: 8px; font-family: 'Space Mono', monospace; font-size: 11px; color: #ffd700;">
+              <span>TOTAL STARS: 21 / 21</span>
+              <span>RANK: PERFECT ARCHITECT</span>
+            </div>
           </div>
-          <button id="btnReplayAll" class="btn" style="background: #ffd700; color: #060911; font-weight: 700; align-self: center; padding: 10px 24px; font-size: 12px;">
-            REPLAY SANCTUARIES FROM PUZZLE 1
-          </button>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+            <button id="btnReplayAll" class="btn" style="background: #ffd700; color: #060911; font-weight: 700; justify-content: center; padding: 10px 24px; font-size: 12px;">
+              REPLAY EXPEDITION FROM PUZZLE 1
+            </button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <button id="btnEpilogueCodex" class="btn" style="justify-content: center; border-color: #ffd700; color: #ffd700;">
+                VIEW CODEX [C]
+              </button>
+              <button id="btnEpilogueMenu" class="btn" style="justify-content: center; border-color: #38bdf8; color: #38bdf8;">
+                RETURN TO TITLE MENU [M]
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-
-      <!-- Pause Modal -->
+      <!-- Pause Modal with Full Action Ladder -->
       <div id="modalPause" class="modal-backdrop hidden">
-        <div class="modal-box" style="border-color: #38bdf8;">
-          <div class="modal-title" style="color: #38bdf8;">SANCTUARY SUSPENDED</div>
-          <div class="modal-body">
-            Isometric camera and transformations paused. Click or press [P] to resume.
+        <div class="modal-box" style="border-color: #38bdf8; max-width: 440px;">
+          <div style="font-size: 10px; color: #38bdf8; letter-spacing: 2px; font-weight: 700;">EXPEDITION SUSPENDED</div>
+          <div class="modal-title" style="color: #38bdf8; font-size: 20px; margin: 2px 0 8px;">SANCTUARY PAUSED</div>
+          <div class="modal-body" style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
+            Isometric camera and transformations frozen. Choose an action:
           </div>
-          <button id="btnResumeGame" class="btn" style="background: #38bdf8; color: #050811; font-weight: 700; align-self: center; padding: 10px 24px;">
-            RESUME PUZZLE
-          </button>
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+            <button id="btnResumeGame" class="btn" style="background: #38bdf8; color: #050811; font-weight: 700; justify-content: center; padding: 10px 24px;">
+              RESUME PUZZLE [P / ESC]
+            </button>
+            <button id="btnPauseRestart" class="btn" style="justify-content: center; border-color: #ffd700; color: #ffd700;">
+              RESTART SANCTUARY [R]
+            </button>
+            <button id="btnPauseSettings" class="btn" style="justify-content: center; border-color: #94a3b8; color: #cbd5e1;">
+              SYSTEM OPTIONS [O]
+            </button>
+            <button id="btnPauseToMenu" class="btn" style="justify-content: center; border-color: #ef4444; color: #f87171;">
+              ABORT TO TITLE MENU [M]
+            </button>
+          </div>
         </div>
       </div>
 
